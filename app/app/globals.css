@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background: #0a0a0f;
+  color: #e4e4e7;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(0, 212, 170, 0.1); }
+  50% { box-shadow: 0 0 30px rgba(0, 212, 170, 0.25); }
+}
+
+.glow-pulse {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Wallet connect button overrides */
+[data-testid="rk-connect-button"],
+button[class*="connect"] {
+  font-size: 14px !important;
+}
+
+/* Scrollbar styling for dark theme */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0a0f;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e1e2e;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #2a2a3e;
+}

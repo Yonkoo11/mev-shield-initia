@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+.bun/
+
+# Build outputs
+app/out/
+app/.next/
+contracts/out/
+contracts/cache/
+settler/dist/
+
+# Environment
+.env
+.env.local
+*.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Lockfiles (bun)
+bun.lockb
+contracts/lib/
+contracts/cache/
