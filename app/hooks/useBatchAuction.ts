@@ -1,12 +1,10 @@
 "use client";
 
 import { useReadContract, useWriteContract, useAccount } from "wagmi";
-import { parseUnits } from "viem";
 import {
   BATCH_AUCTION_ABI,
   BATCH_AUCTION_ADDRESS,
   ERC20_ABI,
-  PRICE_SCALE,
 } from "../lib/contract";
 
 // -- Read: user balance from contract --
@@ -20,7 +18,7 @@ export function useUserBalance() {
     args: address ? [address] : undefined,
     query: {
       enabled: !!address,
-      refetchInterval: 3000,
+      refetchInterval: 5000,
     },
   });
 
@@ -48,7 +46,7 @@ export function useBatch(batchId: bigint | undefined) {
     args: batchId !== undefined ? [batchId] : undefined,
     query: {
       enabled: batchId !== undefined,
-      refetchInterval: 2000,
+      refetchInterval: 5000,
     },
   });
 
@@ -76,7 +74,7 @@ export function useCurrentBatchId() {
     abi: BATCH_AUCTION_ABI,
     functionName: "currentBatchId",
     query: {
-      refetchInterval: 2000,
+      refetchInterval: 5000,
     },
   });
 
@@ -319,4 +317,62 @@ export function useTokenAllowance(
   });
 
   return { allowance: data, refetch };
+}
+
+// -- Read: ERC20 balanceOf (wallet balance, not contract balance) --
+export function useWalletTokenBalance(tokenAddress: `0x${string}` | undefined) {
+  const { address } = useAccount();
+
+  const { data, refetch, isLoading } = useReadContract({
+    address: tokenAddress,
+    abi: ERC20_ABI,
+    functionName: "balanceOf",
+    args: address ? [address] : undefined,
+    query: {
+      enabled: !!tokenAddress && !!address,
+      refetchInterval: 5000,
+    },
+  });
+
+  return { balance: data ?? 0n, refetch, isLoading };
+}
+
+// -- Read: ERC20 decimals --
+export function useTokenDecimals(tokenAddress: `0x${string}` | undefined) {
+  const { data } = useReadContract({
+    address: tokenAddress,
+    abi: ERC20_ABI,
+    functionName: "decimals",
+    query: { enabled: !!tokenAddress },
+  });
+
+  return { decimals: data ?? 18 };
+}
+
+// -- Read: ERC20 symbol --
+export function useTokenSymbol(tokenAddress: `0x${string}` | undefined) {
+  const { data } = useReadContract({
+    address: tokenAddress,
+    abi: ERC20_ABI,
+    functionName: "symbol",
+    query: { enabled: !!tokenAddress },
+  });
+
+  return { symbol: data ?? "" };
+}
+
+// -- Read: hasOrder(batchId, user) --
+export function useHasOrder(batchId: bigint | undefined, userAddress: `0x${string}` | undefined) {
+  const { data, refetch } = useReadContract({
+    address: BATCH_AUCTION_ADDRESS,
+    abi: BATCH_AUCTION_ABI,
+    functionName: "hasOrder",
+    args: batchId !== undefined && userAddress ? [batchId, userAddress] : undefined,
+    query: {
+      enabled: batchId !== undefined && !!userAddress,
+      refetchInterval: 5000,
+    },
+  });
+
+  return { hasOrder: data ?? false, refetch };
 }

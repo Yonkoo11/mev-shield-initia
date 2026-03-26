@@ -1,30 +1,52 @@
 import { defineChain } from "viem";
 
-// -- Chain Configuration --
+// -- Chain Configuration (single source of truth) --
+const rpcUrl =
+  typeof window !== "undefined"
+    ? (process.env.NEXT_PUBLIC_RPC_URL || "http://localhost:8545")
+    : (process.env.NEXT_PUBLIC_RPC_URL || "http://localhost:8545");
+
+export const CHAIN_ID = Number(
+  process.env.NEXT_PUBLIC_CHAIN_ID || "1411570067076288"
+);
+
 export const minitia = defineChain({
-  id: 1411570067076288,
+  id: CHAIN_ID,
   name: "MEV Shield Minitia",
   nativeCurrency: { name: "GAS", symbol: "GAS", decimals: 18 },
   rpcUrls: {
-    default: { http: ["http://localhost:8545"] },
+    default: { http: [rpcUrl] },
   },
   blockExplorers: {
     default: { name: "Explorer", url: "https://explorer.initia.xyz" },
   },
 });
 
-// -- Deployed Contract Address (update after deploy) --
-export const BATCH_AUCTION_ADDRESS =
-  "0x5dDAee13AAdFa374DBd62811412C280d78e1f9BB" as const;
+// -- Deployed Contract Addresses (env-driven with deployed defaults) --
+export const BATCH_AUCTION_ADDRESS = (
+  process.env.NEXT_PUBLIC_AUCTION_ADDRESS ||
+  "0x5dDAee13AAdFa374DBd62811412C280d78e1f9BB"
+) as `0x${string}`;
 
-export const SHIELD_SOL_ADDRESS =
-  "0x3cBb5A79CB5702b9AEc850D0C6c6F47F79200057" as const;
-export const SHIELD_USDC_ADDRESS =
-  "0x4A46e1e80e5e5718e9B2294d312AAc0fE4Bd2668" as const;
+export const SHIELD_SOL_ADDRESS = (
+  process.env.NEXT_PUBLIC_TOKEN_A_ADDRESS ||
+  "0x3cBb5A79CB5702b9AEc850D0C6c6F47F79200057"
+) as `0x${string}`;
+
+export const SHIELD_USDC_ADDRESS = (
+  process.env.NEXT_PUBLIC_TOKEN_B_ADDRESS ||
+  "0x4A46e1e80e5e5718e9B2294d312AAc0fE4Bd2668"
+) as `0x${string}`;
 
 // -- Constants matching the Solidity contract --
 export const PRICE_SCALE = 1_000_000n;
+export const PRICE_DECIMALS = 6; // PRICE_SCALE = 1e6, prices use 6 decimal places
+export const TOKEN_DECIMALS = 18; // Both shSOL and shUSDC are 18-decimal ERC20s
 export const MAX_ORDERS = 20;
+
+// Friendly display names (contract symbols are shSOL/shUSDC)
+export const TOKEN_A_DISPLAY = "INIT";
+export const TOKEN_B_DISPLAY = "USDC";
 
 // -- Full ABI --
 export const BATCH_AUCTION_ABI = [
@@ -291,6 +313,16 @@ export const BATCH_AUCTION_ABI = [
     name: "paused",
     stateMutability: "view",
     inputs: [],
+    outputs: [{ name: "", type: "bool" }],
+  },
+  {
+    type: "function",
+    name: "hasOrder",
+    stateMutability: "view",
+    inputs: [
+      { name: "batchId", type: "uint64" },
+      { name: "user", type: "address" },
+    ],
     outputs: [{ name: "", type: "bool" }],
   },
 ] as const;

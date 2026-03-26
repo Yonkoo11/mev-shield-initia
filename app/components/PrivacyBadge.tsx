@@ -1,16 +1,15 @@
 export function PrivacyBadge() {
   return (
-    <div className="bg-shield-card border border-shield-border rounded-xl p-4 glow-pulse">
+    <div className="bg-shield-card border border-shield-accent/20 rounded-lg p-4">
       <div className="flex items-center gap-3">
-        <div className="w-3 h-3 rounded-full bg-shield-accent animate-pulse" />
+        <div className="w-2.5 h-2.5 rounded-full bg-shield-accent shrink-0" />
         <div>
           <p className="text-sm font-medium text-shield-accent">
-            MEV Protected Trading
+            MEV Protected
           </p>
-          <p className="text-xs text-shield-muted mt-1">
-            Orders encrypted inside private batch auctions on Initia MiniEVM.
-            Invisible to validators, searchers, and other traders until batch
-            settlement. Uniform clearing price eliminates frontrunning.
+          <p className="text-xs text-shield-muted mt-0.5">
+            Orders sealed in batch auctions on Initia MiniEVM. Uniform clearing
+            price eliminates frontrunning.
           </p>
         </div>
       </div>

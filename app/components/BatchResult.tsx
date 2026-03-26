@@ -1,17 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useAccount, useReadContract } from "wagmi";
-import { formatUnits } from "viem";
+import { useAccount } from "wagmi";
 import {
   useCurrentBatchId,
   useBatch,
+  useHasOrder,
 } from "../hooks/useBatchAuction";
-import {
-  BATCH_AUCTION_ABI,
-  BATCH_AUCTION_ADDRESS,
-  PRICE_SCALE,
-} from "../lib/contract";
+import { PRICE_SCALE } from "../lib/contract";
 
 interface SettledBatch {
   batchId: bigint;
@@ -21,22 +16,30 @@ interface SettledBatch {
   sellCount: number;
 }
 
+function UserOrderResult({ batchId, clearingPrice }: { batchId: bigint; clearingPrice: number }) {
+  const { address } = useAccount();
+  const { hasOrder } = useHasOrder(batchId, address as `0x${string}` | undefined);
+
+  if (!hasOrder) return null;
+
+  return (
+    <div className="mt-2 pt-2 border-t border-shield-border">
+      <div className="flex items-center gap-2 text-xs">
+        <div className="w-2 h-2 rounded-full bg-shield-accent" />
+        <span className="text-shield-accent font-medium">
+          {clearingPrice > 0
+            ? `Your order filled at ${clearingPrice.toFixed(2)} USDC/INIT`
+            : "Your order was not filled (no crossing)"}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export function BatchResult() {
   const { isConnected } = useAccount();
   const { currentBatchId } = useCurrentBatchId();
-  const [results, setResults] = useState<SettledBatch[]>([]);
 
-  // We manually poll the last 5 batches for settled results
-  // Since wagmi hooks are fixed per-call, we read in a useEffect with raw reads
-  useEffect(() => {
-    if (currentBatchId === undefined || currentBatchId === 0n) return;
-
-    const settled: SettledBatch[] = [];
-    // We will just display whatever we have from the hook-level
-    // For a production app, you would use multicall or event logs
-  }, [currentBatchId]);
-
-  // For simplicity, show the last batch if it's settled
   const lastBatchId =
     currentBatchId !== undefined && currentBatchId > 0n
       ? currentBatchId - 1n
@@ -57,48 +60,21 @@ export function BatchResult() {
 
   const settledBatches: SettledBatch[] = [];
 
-  if (lastBatch && lastBatch.status === 2 && lastBatchId !== undefined) {
-    settledBatches.push({
-      batchId: lastBatchId,
-      clearingPrice:
-        Number(lastBatch.clearingPrice) / Number(PRICE_SCALE),
-      orderCount: Number(lastBatch.buyCount) + Number(lastBatch.sellCount),
-      buyCount: Number(lastBatch.buyCount),
-      sellCount: Number(lastBatch.sellCount),
-    });
-  }
+  const addBatch = (batch: typeof lastBatch, id: bigint | undefined) => {
+    if (batch && batch.status === 2 && id !== undefined) {
+      settledBatches.push({
+        batchId: id,
+        clearingPrice: Number(batch.clearingPrice) / Number(PRICE_SCALE),
+        orderCount: Number(batch.buyCount) + Number(batch.sellCount),
+        buyCount: Number(batch.buyCount),
+        sellCount: Number(batch.sellCount),
+      });
+    }
+  };
 
-  if (
-    secondLastBatch &&
-    secondLastBatch.status === 2 &&
-    secondLastBatchId !== undefined
-  ) {
-    settledBatches.push({
-      batchId: secondLastBatchId,
-      clearingPrice:
-        Number(secondLastBatch.clearingPrice) / Number(PRICE_SCALE),
-      orderCount:
-        Number(secondLastBatch.buyCount) + Number(secondLastBatch.sellCount),
-      buyCount: Number(secondLastBatch.buyCount),
-      sellCount: Number(secondLastBatch.sellCount),
-    });
-  }
-
-  if (
-    thirdLastBatch &&
-    thirdLastBatch.status === 2 &&
-    thirdLastBatchId !== undefined
-  ) {
-    settledBatches.push({
-      batchId: thirdLastBatchId,
-      clearingPrice:
-        Number(thirdLastBatch.clearingPrice) / Number(PRICE_SCALE),
-      orderCount:
-        Number(thirdLastBatch.buyCount) + Number(thirdLastBatch.sellCount),
-      buyCount: Number(thirdLastBatch.buyCount),
-      sellCount: Number(thirdLastBatch.sellCount),
-    });
-  }
+  addBatch(lastBatch, lastBatchId);
+  addBatch(secondLastBatch, secondLastBatchId);
+  addBatch(thirdLastBatch, thirdLastBatchId);
 
   if (!isConnected) return null;
 
@@ -123,7 +99,7 @@ export function BatchResult() {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-shield-muted">Clearing Price</span>
-              <span className="text-lg font-mono font-bold text-shield-accent">
+              <span className="text-lg font-mono font-bold text-shield-accent tabular-nums">
                 {batch.clearingPrice > 0
                   ? `$${batch.clearingPrice.toFixed(2)}`
                   : "No cross"}
@@ -133,6 +109,10 @@ export function BatchResult() {
               <span>Buys: {batch.buyCount}</span>
               <span>Sells: {batch.sellCount}</span>
             </div>
+            <UserOrderResult
+              batchId={batch.batchId}
+              clearingPrice={batch.clearingPrice}
+            />
           </div>
         ))}
         {settledBatches.length === 0 && (

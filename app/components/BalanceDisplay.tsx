@@ -3,14 +3,18 @@
 import { useAccount } from "wagmi";
 import { formatUnits } from "viem";
 import { useUserBalance } from "../hooks/useBatchAuction";
+import { TOKEN_DECIMALS, TOKEN_A_DISPLAY, TOKEN_B_DISPLAY } from "../lib/contract";
 
 export function BalanceDisplay() {
   const { isConnected } = useAccount();
   const { balance, isLoading } = useUserBalance();
 
+  const labelA = TOKEN_A_DISPLAY;
+  const labelB = TOKEN_B_DISPLAY;
+
   const fmt = (val: bigint | undefined) => {
     if (!val) return "0.00";
-    return parseFloat(formatUnits(val, 6)).toFixed(2);
+    return parseFloat(formatUnits(val, TOKEN_DECIMALS)).toFixed(2);
   };
 
   if (!isConnected) return null;
@@ -28,9 +32,9 @@ export function BalanceDisplay() {
       ) : balance ? (
         <div className="space-y-3">
           <div className="flex justify-between">
-            <span className="text-shield-muted text-sm">INIT (Token A)</span>
+            <span className="text-shield-muted text-sm">{labelA}</span>
             <div className="text-right">
-              <span className="text-lg font-mono">
+              <span className="text-lg font-mono tabular-nums">
                 {fmt(balance.tokenABalance)}
               </span>
               {balance.tokenALocked > 0n && (
@@ -41,9 +45,9 @@ export function BalanceDisplay() {
             </div>
           </div>
           <div className="flex justify-between">
-            <span className="text-shield-muted text-sm">USDC (Token B)</span>
+            <span className="text-shield-muted text-sm">{labelB}</span>
             <div className="text-right">
-              <span className="text-lg font-mono">
+              <span className="text-lg font-mono tabular-nums">
                 {fmt(balance.tokenBBalance)}
               </span>
               {balance.tokenBLocked > 0n && (

@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
 import { parseUnits, formatUnits } from "viem";
-import { useSubmitOrder, useCancelOrder } from "../hooks/useBatchAuction";
-import { PRICE_SCALE } from "../lib/contract";
+import { useSubmitOrder, useCancelOrder, useUserBalance } from "../hooks/useBatchAuction";
+import { TOKEN_DECIMALS, PRICE_DECIMALS } from "../lib/contract";
+import { parseContractError } from "../lib/errors";
+import { useToast } from "./Toast";
 
 interface OrderFormProps {
   batchId: bigint | null;
@@ -13,10 +15,12 @@ interface OrderFormProps {
 
 export function OrderForm({ batchId, onOrderSubmitted }: OrderFormProps) {
   const { isConnected } = useAccount();
+  const toast = useToast();
   const [side, setSide] = useState<"buy" | "sell">("buy");
   const [price, setPrice] = useState("");
   const [amount, setAmount] = useState("");
-  const [status, setStatus] = useState("");
+
+  const { balance } = useUserBalance();
 
   const {
     submitOrder,
@@ -36,34 +40,54 @@ export function OrderForm({ batchId, onOrderSubmitted }: OrderFormProps) {
 
   useEffect(() => {
     if (submitSuccess) {
-      setStatus(
-        `Order submitted to batch #${batchId?.toString()}! Your order is encrypted inside the TEE.`
-      );
+      toast.success(`Order submitted to batch #${batchId?.toString()}! Sealed until settlement.`);
       setPrice("");
       setAmount("");
       onOrderSubmitted?.();
-      setTimeout(() => { resetSubmit(); setStatus(""); }, 5000);
+      resetSubmit();
     }
     if (submitError) {
-      setStatus("Error: " + (submitErr?.message || "Transaction failed"));
+      toast.error(parseContractError(submitErr));
+      resetSubmit();
     }
-  }, [submitSuccess, submitError, submitErr, batchId, onOrderSubmitted, resetSubmit]);
+  }, [submitSuccess, submitError, submitErr, batchId, onOrderSubmitted, resetSubmit, toast]);
 
   useEffect(() => {
     if (cancelSuccess) {
-      setStatus("Order cancelled.");
-      setTimeout(() => { resetCancel(); setStatus(""); }, 3000);
+      toast.success("Order cancelled.");
+      resetCancel();
     }
-  }, [cancelSuccess, resetCancel]);
+  }, [cancelSuccess, resetCancel, toast]);
+
+  // Validation
+  const parsedPrice = price ? parseFloat(price) : 0;
+  const parsedAmount = amount ? parseFloat(amount) : 0;
+  const priceInvalid = price !== "" && parsedPrice <= 0;
+  const amountInvalid = amount !== "" && parsedAmount <= 0;
+
+  // Check deposited balance for the relevant side
+  const availableBalance = balance
+    ? side === "buy"
+      ? balance.tokenBBalance - balance.tokenBLocked // need USDC to buy
+      : balance.tokenABalance - balance.tokenALocked // need INIT to sell
+    : 0n;
+
+  const orderCost = price && amount
+    ? side === "buy"
+      ? parseUnits((parsedPrice * parsedAmount).toFixed(TOKEN_DECIMALS), TOKEN_DECIMALS) // USDC needed
+      : parseUnits(amount, TOKEN_DECIMALS) // INIT needed
+    : 0n;
+
+  const insufficientBalance = orderCost > 0n && orderCost > availableBalance;
 
   const handleSubmit = () => {
     if (!price || !amount || batchId === null) return;
+    if (priceInvalid || amountInvalid || insufficientBalance) return;
 
     const sideNum = side === "buy" ? 0 : 1;
-    const limitPrice = parseUnits(price, 6); // PRICE_SCALE = 1e6
-    const orderAmount = parseUnits(amount, 6);
+    const limitPrice = parseUnits(price, PRICE_DECIMALS);
+    const orderAmount = parseUnits(amount, TOKEN_DECIMALS);
 
-    setStatus("Encrypting order for TEE...");
     submitOrder(batchId, sideNum, limitPrice, orderAmount);
   };
 
@@ -73,6 +97,7 @@ export function OrderForm({ batchId, onOrderSubmitted }: OrderFormProps) {
   };
 
   const isPending = submitPending || cancelPending;
+  const fmt = (val: bigint) => parseFloat(formatUnits(val, TOKEN_DECIMALS)).toFixed(2);
 
   if (!isConnected) return null;
 
@@ -112,6 +137,12 @@ export function OrderForm({ batchId, onOrderSubmitted }: OrderFormProps) {
             </button>
           </div>
 
+          {/* Available balance */}
+          <div className="text-xs text-shield-muted mb-3">
+            Available: <span className="font-mono text-shield-text">{fmt(availableBalance)}</span>{" "}
+            {side === "buy" ? "USDC" : "INIT"}
+          </div>
+
           <div className="space-y-3">
             <div>
               <label className="text-xs text-shield-muted">
@@ -122,8 +153,13 @@ export function OrderForm({ batchId, onOrderSubmitted }: OrderFormProps) {
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
                 placeholder="1.50"
+                min="0"
+                step="0.01"
                 className="w-full mt-1 bg-shield-bg border border-shield-border rounded-lg px-3 py-2 text-base font-mono focus:outline-none focus:border-shield-accent"
               />
+              {priceInvalid && (
+                <p className="text-[10px] text-shield-red mt-1">Price must be greater than 0</p>
+              )}
             </div>
             <div>
               <label className="text-xs text-shield-muted">Amount (INIT)</label>
@@ -132,24 +168,32 @@ export function OrderForm({ batchId, onOrderSubmitted }: OrderFormProps) {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="100.00"
+                min="0"
+                step="0.01"
                 className="w-full mt-1 bg-shield-bg border border-shield-border rounded-lg px-3 py-2 text-base font-mono focus:outline-none focus:border-shield-accent"
               />
+              {amountInvalid && (
+                <p className="text-[10px] text-shield-red mt-1">Amount must be greater than 0</p>
+              )}
             </div>
 
-            {price && amount && (
-              <div className="bg-shield-bg rounded-lg p-3 text-xs text-shield-muted">
+            {price && amount && parsedPrice > 0 && parsedAmount > 0 && (
+              <div className="bg-shield-bg rounded-lg p-3 text-xs text-shield-muted space-y-1">
                 <div className="flex justify-between">
                   <span>Total {side === "buy" ? "cost" : "proceeds"}</span>
                   <span className="font-mono text-shield-text">
-                    {(parseFloat(price) * parseFloat(amount)).toFixed(2)} USDC
+                    {(parsedPrice * parsedAmount).toFixed(2)} USDC
                   </span>
                 </div>
+                {insufficientBalance && (
+                  <p className="text-shield-red">Insufficient deposited balance</p>
+                )}
               </div>
             )}
 
             <button
               onClick={handleSubmit}
-              disabled={isPending || !price || !amount}
+              disabled={isPending || !price || !amount || priceInvalid || amountInvalid || insufficientBalance}
               className={`w-full py-3 rounded-lg text-sm font-medium transition-colors duration-150 ease-out disabled:opacity-50 ${
                 side === "buy"
                   ? "bg-shield-accent text-shield-bg hover:bg-shield-accent/90"
@@ -157,7 +201,7 @@ export function OrderForm({ batchId, onOrderSubmitted }: OrderFormProps) {
               }`}
             >
               {submitPending
-                ? "Encrypting & Submitting..."
+                ? "Submitting..."
                 : `${side === "buy" ? "Buy" : "Sell"} INIT`}
             </button>
 
@@ -169,24 +213,6 @@ export function OrderForm({ batchId, onOrderSubmitted }: OrderFormProps) {
               {cancelPending ? "Cancelling..." : "Cancel My Order"}
             </button>
 
-            {status && (
-              <div
-                className={`flex items-center gap-2 text-xs mt-2 ${
-                  status.startsWith("Error")
-                    ? "text-shield-red"
-                    : "text-shield-accent"
-                }`}
-              >
-                <div
-                  className={`w-2 h-2 rounded-full ${
-                    status.startsWith("Error")
-                      ? "bg-shield-red"
-                      : "bg-shield-accent"
-                  }`}
-                />
-                {status}
-              </div>
-            )}
           </div>
         </>
       )}
