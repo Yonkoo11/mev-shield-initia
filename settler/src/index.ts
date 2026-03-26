@@ -43,6 +43,16 @@ async function main() {
       console.log(`Waiting ${BATCH_DURATION + 1}s for batch to expire...`);
       await new Promise((r) => setTimeout(r, waitMs));
 
+      // Check if batch has orders before settling
+      const batch = await auction.getBatch(batchId);
+      const buyCount = Number(batch[3]);
+      const sellCount = Number(batch[4]);
+
+      if (buyCount === 0 && sellCount === 0) {
+        console.log(`Batch #${batchId}: no orders, skipping settlement`);
+        continue;
+      }
+
       // Settle the batch
       const tx2 = await auction.settleBatch(batchId);
       const receipt2 = await tx2.wait();
@@ -59,20 +69,14 @@ async function main() {
         });
         if (decoded) {
           console.log(
-            `Batch #${batchId} settled: clearingPrice=${decoded.args.clearingPrice}, filled=${decoded.args.filled}, unfilled=${decoded.args.unfilled}`
+            `Batch #${batchId} settled: price=${decoded.args.clearingPrice}, filled=${decoded.args.filled}, unfilled=${decoded.args.unfilled}`
           );
         }
       } else {
         console.log(`Batch #${batchId} settled (tx: ${receipt2.hash})`);
       }
     } catch (err: any) {
-      // NoOrders is expected when no one submitted orders
-      if (err.message?.includes("NoOrders") || err.data?.includes("0x")) {
-        console.log("No orders in batch, skipping settlement...");
-      } else {
-        console.error("Error:", err.message || err);
-      }
-      // Wait before retrying
+      console.error("Settler error:", err.shortMessage || err.message || err);
       await new Promise((r) => setTimeout(r, 5000));
     }
   }
