@@ -6,11 +6,11 @@ import { defineChain } from "viem";
 import { injected, metaMask } from "wagmi/connectors";
 
 export const minitia = defineChain({
-  id: 12345678,
+  id: 1411570067076288,
   name: "MEV Shield Minitia",
-  nativeCurrency: { name: "INIT", symbol: "INIT", decimals: 18 },
+  nativeCurrency: { name: "GAS", symbol: "GAS", decimals: 18 },
   rpcUrls: {
-    default: { http: ["http://localhost:1317"] },
+    default: { http: ["http://localhost:8545"] },
   },
   blockExplorers: {
     default: { name: "Explorer", url: "https://explorer.initia.xyz" },

@@ -1,31 +1,35 @@
 # MEV Shield Initia - Progress
 
-## Status: Phase 1-3 COMPLETE (2026-03-26)
+## Status: Phase 0-4 COMPLETE (2026-03-26)
 
 ## Completed
-- [x] Phase 1a: BatchAuction.sol - 7 functions, clearing price algorithm ported from Solana
-- [x] Phase 1b: ShieldSOL.sol + ShieldUSDC.sol - plain OZ ERC20, 18 decimals each
-- [x] Phase 1c: 14 Foundry tests - ALL PASSING (forge test -vv)
-- [x] Phase 1d: Deploy.s.sol - deploys tokens + auction + mints demo tokens
-- [x] Phase 2: Settler service (settler/) - ethers.js v6 crank loop
-- [x] Phase 3: Frontend (app/) - Next.js 14 + wagmi + viem + Tailwind
-  - 8 components, 15 wagmi hooks, dark trading UI
-  - `npx next build` succeeds (static export)
-  - Deps installed via bun
+- [x] Phase 0: Rollup live (weave v0.3.8, mevshield-1, bridge ID 1705)
+- [x] Phase 1a: BatchAuction.sol - 7 functions, 14/14 Foundry tests pass
+- [x] Phase 1b: ShieldSOL.sol + ShieldUSDC.sol - ERC20, 18 decimals
+- [x] Phase 1c-d: Tests + Deploy script
+- [x] Phase 2: Settler service (ethers.js v6 crank)
+- [x] Phase 3: Frontend (Next.js 14 + wagmi, builds clean)
+- [x] Phase 4: E2E on-chain verified (deposit, order, settle all succeed)
 
-## Placeholders (update after rollup deploy)
-- `app/lib/contract.ts`: BATCH_AUCTION_ADDRESS (currently 0x0)
-- `app/app/providers.tsx`: chain ID 12345678, RPC localhost:1317
-- `settler/.env`: AUCTION_ADDRESS, RPC_URL, PRIVATE_KEY
+## Deployment (Testnet - mevshield-1)
+- Chain ID: 1411570067076288 (EVM)
+- JSON-RPC: http://localhost:8545
+- REST API: http://localhost:1317
+- Bridge ID: 1705
+- ShieldSOL: 0x3cBb5A79CB5702b9AEc850D0C6c6F47F79200057
+- ShieldUSDC: 0x4A46e1e80e5e5718e9B2294d312AAc0fE4Bd2668
+- BatchAuction: 0x5dDAee13AAdFa374DBd62811412C280d78e1f9BB
+- Deployer: 0x9aE2a08cA91d6C79047810304022de26605B0573
+- Gas price: 0 (free txs)
+
+## E2E Test Results
+- approve + deposit: SUCCESS
+- openBatch: SUCCESS
+- submitOrder (sell 50 SOL @ 130): SUCCESS
+- settleBatch (0 clearing, 1 sell unfilled): SUCCESS
+- Funds unlocked after settlement: VERIFIED
 
 ## Next Steps
-- [ ] Phase 0: weave CLI, launch rollup, deploy contracts on-chain
-- [ ] Phase 4: E2E integration on rollup
-- [ ] Phase 5: Demo video, README, DoraHacks submission
-
-## Commands
-```bash
-cd contracts && forge test -vv       # 14/14 pass
-cd app && npx next build             # builds clean
-cd settler && bun run start          # needs .env
-```
+- [ ] Phase 5: Demo video, DoraHacks submission
+- [ ] Start settler crank loop
+- [ ] Polish frontend for demo

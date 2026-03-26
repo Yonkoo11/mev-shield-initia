@@ -2,11 +2,11 @@ import { defineChain } from "viem";
 
 // -- Chain Configuration --
 export const minitia = defineChain({
-  id: 12345678,
+  id: 1411570067076288,
   name: "MEV Shield Minitia",
-  nativeCurrency: { name: "INIT", symbol: "INIT", decimals: 18 },
+  nativeCurrency: { name: "GAS", symbol: "GAS", decimals: 18 },
   rpcUrls: {
-    default: { http: ["http://localhost:1317"] },
+    default: { http: ["http://localhost:8545"] },
   },
   blockExplorers: {
     default: { name: "Explorer", url: "https://explorer.initia.xyz" },
@@ -15,7 +15,12 @@ export const minitia = defineChain({
 
 // -- Deployed Contract Address (update after deploy) --
 export const BATCH_AUCTION_ADDRESS =
-  "0x0000000000000000000000000000000000000000" as const;
+  "0x5dDAee13AAdFa374DBd62811412C280d78e1f9BB" as const;
+
+export const SHIELD_SOL_ADDRESS =
+  "0x3cBb5A79CB5702b9AEc850D0C6c6F47F79200057" as const;
+export const SHIELD_USDC_ADDRESS =
+  "0x4A46e1e80e5e5718e9B2294d312AAc0fE4Bd2668" as const;
 
 // -- Constants matching the Solidity contract --
 export const PRICE_SCALE = 1_000_000n;
