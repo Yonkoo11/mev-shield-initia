@@ -1,6 +1,6 @@
 # MEV Shield Initia - Progress
 
-## Status: Product Rethink In Progress (2026-04-01)
+## Status: Product Rethink Complete, Design Phase Next (2026-04-01)
 
 ## Infrastructure Running
 - Minitia rollup: EVM RPC on :8545, gas price = 0
@@ -107,6 +107,42 @@ User decided: rethink the product entirely before writing more code.
 6. Then build properly
 
 Hackathon deadline is still April 15. Current code compiles and can be submitted as-is if needed, but the real product comes after proper design.
+
+## Competitive Research Complete (2026-04-01)
+
+### Products studied:
+1. **CowSwap**: Solver competition, uniform clearing, gasless. $9B/month. Friendly cow branding. Fatal flaw: invisible value, 50% post-airdrop drop.
+2. **Hyperliquid**: CEX-like appchain DEX. 200K orders/sec. Clean dark pro interface. TradingView charts + order book.
+3. **dYdX v4**: Cosmos appchain. Off-chain orderbook, on-chain settlement. Data-rich marketplace view.
+4. **Osmosis**: Cosmos AMM hub. Clean purple theme. Buy/Sell/Swap tabs. IBC liquidity solved cold-start.
+5. **Astroport**: Cosmos DEX. Blue gradient background with floating 3D elements. Swap-focused.
+6. **Sei**: Batch auctions at consensus level. 400ms blocks. MEV impossible by design.
+7. **Penumbra**: Privacy-first Cosmos DEX. Sealed-bid batches.
+8. **1inch Fusion**: Dutch auction resolvers. Invisible MEV protection.
+9. **Flashbots Protect**: RPC endpoint, zero UI. 2.1M users.
+
+### Initia ecosystem state:
+- $3.8M TVL (tiny, mainnet just launched)
+- Minitswap: built-in bridging DEX (not general trading)
+- Contro: DeFi rollup with Gradual LOB (direct competitor)
+- MiniEVM: Cosmos precompiles, oracle access, unified token standard
+
+### Product direction decided: ai/product-direction.md
+- Reframe from "MEV protection DEX" to "fair trading chain"
+- Batch auctions at sequencer level (like Sei, but on Initia)
+- IBC for cross-rollup liquidity (like Osmosis)
+- Session signing for CEX-like UX
+- Multi-pair support via factory pattern
+
+### Screenshots captured:
+- CowSwap (cow.fi swap page)
+- Hyperliquid (HYPE/USDC trading view)
+- Osmosis (swap interface)
+- dYdX (markets overview)
+- Astroport (swap page with 3D background)
+
+### NEXT: Run /design with competitive context
+Feed all competitor research + screenshots into /design to generate 3 distinct proposals for MEV Shield's interface. Then review segment-by-segment.
 
 ## Commands
 ```bash
