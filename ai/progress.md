@@ -1,6 +1,6 @@
 # MEV Shield Initia - Progress
 
-## Status: InterwovenKit Integrated, Hackathon Submission In Progress (2026-04-01)
+## Status: Product Rethink In Progress (2026-04-01)
 
 ## Infrastructure Running
 - Minitia rollup: EVM RPC on :8545, gas price = 0
@@ -85,13 +85,28 @@
 - All existing transaction flows (approve, deposit, order) still working through new connector
 - .init username display
 
+## Product Rethink Decision (2026-04-01)
+
+Security audit of contracts found structural issues:
+- Clearing price algorithm uses midpoint (incentivizes gaming, not honest bids)
+- No reentrancy guards on withdraw
+- openBatch() has no access control
+- Emergency pause doesn't cover settlement
+- No slippage protection
+- Settler is centralized single point of failure that CAN extract MEV
+- The core pitch ("MEV protection on Initia") is contradictory: you control the sequencer, MEV doesn't exist
+
+User decided: rethink the product entirely before writing more code.
+
 ## Next Steps
-1. Start dev server and test InterwovenKit wallet connection
-2. Test all transaction flows work through new connector
-3. Test auto-sign toggle and verify EVM calls auto-sign
-4. Update README.md for hackathon submission
-5. Record demo video (use /demo-video 24h before deadline)
-6. Submit on DoraHacks
+1. Competitive research: study 3-5 products similar to what we're building (batch auction DEXs, MEV protection, Initia DeFi)
+2. Identify what's genuinely unique about Initia appchains for DeFi
+3. Define the real product (may keep batch auctions, may pivot entirely)
+4. Run /design with competitive context for UI/UX proposals
+5. Review designs segment-by-segment
+6. Then build properly
+
+Hackathon deadline is still April 15. Current code compiles and can be submitted as-is if needed, but the real product comes after proper design.
 
 ## Commands
 ```bash
