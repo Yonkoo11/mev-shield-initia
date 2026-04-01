@@ -1,6 +1,17 @@
 # MEV Shield Initia - Progress
 
-## Status: Product Rethink Complete, Design Phase Next (2026-04-01)
+## Status: Design Proposals Ready for Review (2026-04-02)
+
+## What Changed (Plain English)
+Three completely different design mockups for the app are now ready to open in a browser and compare:
+
+1. **The Vault** -- Picture a set of glowing rings with dots orbiting around them. Each dot is someone's order. A countdown ticks in the center. When it hits zero, the rings contract (the vault seals), a price is computed, and the rings pulse back out. The trading panel sits on the right side. Dark, dense, animated.
+
+2. **The Shield Wall** -- A top-to-bottom flow. You place your order at the top, it drops through a glowing green barrier into a sealed batch (shown as a wall of hidden orders), and the results emerge at the bottom showing what filled and what didn't. Spacious and elegant, lots of breathing room.
+
+3. **The Crossing** -- A split screen. Buy orders stack down the left side in cyan. Sell orders stack up the right side in coral. They meet in the middle at one price line. The order form sits at the center. You literally see buyers and sellers converging on the fair price.
+
+All three work as standalone pages you can open in any browser. Each has a landing screen that appears before you connect, a full trading interface after you connect, a live countdown timer, and scales down to phone width.
 
 ## Infrastructure Running
 - Minitia rollup: EVM RPC on :8545, gas price = 0
