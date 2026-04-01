@@ -25,7 +25,13 @@ DNA Codes: VAULT-RING-TEAL-MOTION-DENSE, WALL-LAYER-EMERALD-MINIMAL-SPACIOUS, CL
 Notes: All 3 have landing + connected states. Screenshots taken of all 6 views.
 
 ## Phase 3: Selection
-Status: pending
+Status: completed
+Selected: Hybrid (P3 layout + P2 lifecycle + P1 identity)
+Details:
+  - P3 three-column crossing layout (buy depth | order form + clearing price | sell depth)
+  - P2 navigation (Trade/Bridge/History/Docs) + batch lifecycle section below trading view
+  - P1 header stats bar + ring as small batch timer element + teal accent
+  - Add: background depth, session signing above fold, ring-contract animation on batch seal
 
 ## Phase 4: Production Polish
 Status: pending
