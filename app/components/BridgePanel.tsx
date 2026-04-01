@@ -1,18 +1,27 @@
 "use client";
 
 import { useAccount } from "wagmi";
+import { useInterwovenKit } from "@initia/interwovenkit-react";
 
 export function BridgePanel() {
   const { isConnected } = useAccount();
+  const { openBridge } = useInterwovenKit();
 
   if (!isConnected) return null;
 
+  const handleBridge = () => {
+    openBridge({
+      srcChainId: "initiation-2",
+      srcDenom: "uinit",
+      dstChainId: "mevshield-1",
+      dstDenom: "uinit",
+    });
+  };
+
   return (
-    <a
-      href="https://app.testnet.initia.xyz/bridge"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="block bg-shield-card border border-shield-border rounded-xl p-4 hover:border-shield-accent/30 transition-colors duration-150 ease-out group"
+    <button
+      onClick={handleBridge}
+      className="block w-full bg-shield-card border border-shield-border rounded-xl p-4 hover:border-shield-accent/30 transition-colors duration-150 ease-out group text-left"
     >
       <div className="flex items-center gap-3">
         <div className="w-8 h-8 rounded-lg bg-shield-accent/10 flex items-center justify-center shrink-0">
@@ -32,10 +41,10 @@ export function BridgePanel() {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-shield-text group-hover:text-shield-accent transition-colors">
-            Initia Bridge
+            Interwoven Bridge
           </p>
           <p className="text-xs text-shield-muted">
-            Bridge INIT and USDC from Initia L1
+            Bridge INIT from Initia L1 to MEV Shield
           </p>
         </div>
         <svg
@@ -44,9 +53,9 @@ export function BridgePanel() {
           viewBox="0 0 24 24"
           stroke="currentColor"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
         </svg>
       </div>
-    </a>
+    </button>
   );
 }

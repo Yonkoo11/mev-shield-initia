@@ -1,16 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { useAccount, useConnect, useDisconnect } from "wagmi";
+import { useAccount, useDisconnect } from "wagmi";
+import { useInterwovenKit } from "@initia/interwovenkit-react";
+import { INITIA_CHAIN_ID } from "../lib/contract";
 
 export function Header() {
   const { address, isConnected } = useAccount();
-  const { connectors, connect } = useConnect();
   const { disconnect } = useDisconnect();
+  const { username, openConnect, openWallet, autoSign } = useInterwovenKit();
   const [copied, setCopied] = useState(false);
 
-  const truncateAddress = (addr: string) =>
-    `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+  const displayName = username || (address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "");
 
   const copyAddress = () => {
     if (!address) return;
@@ -18,6 +19,8 @@ export function Header() {
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };
+
+  const isAutoSigning = autoSign?.isEnabledByChain?.[INITIA_CHAIN_ID] ?? false;
 
   return (
     <header className="flex items-center justify-between py-4 border-b border-shield-border gap-2">
@@ -54,6 +57,11 @@ export function Header() {
       <div className="flex items-center gap-2">
         {isConnected && address ? (
           <div className="flex items-center gap-2">
+            {isAutoSigning && (
+              <span className="text-[10px] text-shield-accent bg-shield-accent/10 px-1.5 py-0.5 rounded hidden sm:inline">
+                Auto-Sign
+              </span>
+            )}
             <button
               onClick={copyAddress}
               className="flex items-center gap-2 bg-shield-card border border-shield-border rounded-lg px-3 py-2 text-sm hover:border-shield-accent/30 transition-colors duration-150 ease-out"
@@ -61,8 +69,17 @@ export function Header() {
             >
               <div className="w-2 h-2 rounded-full bg-shield-accent" />
               <span className="font-mono text-xs">
-                {copied ? "Copied!" : truncateAddress(address)}
+                {copied ? "Copied!" : displayName}
               </span>
+            </button>
+            <button
+              onClick={openWallet}
+              className="bg-shield-card border border-shield-border rounded-lg px-2.5 py-2 text-shield-muted hover:text-shield-accent hover:border-shield-accent/30 transition-colors duration-150 ease-out"
+              title="Wallet"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+              </svg>
             </button>
             <button
               onClick={() => disconnect()}
@@ -75,17 +92,12 @@ export function Header() {
             </button>
           </div>
         ) : (
-          <div className="hidden sm:flex gap-2">
-            {connectors.map((connector) => (
-              <button
-                key={connector.uid}
-                onClick={() => connect({ connector })}
-                className="bg-shield-accent/10 text-shield-accent border border-shield-accent/30 rounded-lg px-4 py-2 text-sm font-medium hover:bg-shield-accent/20 transition-colors duration-150 ease-out"
-              >
-                Connect {connector.name}
-              </button>
-            ))}
-          </div>
+          <button
+            onClick={openConnect}
+            className="bg-shield-accent/10 text-shield-accent border border-shield-accent/30 rounded-lg px-4 py-2 text-sm font-medium hover:bg-shield-accent/20 transition-colors duration-150 ease-out"
+          >
+            Connect Wallet
+          </button>
         )}
       </div>
     </header>

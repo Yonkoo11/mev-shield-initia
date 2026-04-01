@@ -48,6 +48,10 @@ export const MAX_ORDERS = 20;
 export const TOKEN_A_DISPLAY = "INIT";
 export const TOKEN_B_DISPLAY = "USDC";
 
+// Initia Cosmos chain ID for InterwovenKit (distinct from EVM chain ID)
+export const INITIA_CHAIN_ID =
+  process.env.NEXT_PUBLIC_INITIA_CHAIN_ID || "mevshield-1";
+
 // -- Full ABI --
 export const BATCH_AUCTION_ABI = [
   // --- Errors ---

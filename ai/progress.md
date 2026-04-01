@@ -1,6 +1,6 @@
 # MEV Shield Initia - Progress
 
-## Status: Production Polish + Design Complete, E2E Ready (2026-03-26)
+## Status: InterwovenKit Integrated, Hackathon Submission In Progress (2026-04-01)
 
 ## Infrastructure Running
 - Minitia rollup: EVM RPC on :8545, gas price = 0
@@ -60,18 +60,38 @@
 - SSR errors: 0
 - tsc --noEmit: clean for both app/ and settler/
 
-## NOT Tested
-- Wallet connect + deposit + order through the actual UI
-- Toast notification rendering on real tx success/error
-- ChainGuard wrong-network banner
-- Connected-state trading UI with live data in new font
+## What Changed (Plain English) - 2026-04-01
+
+### InterwovenKit Integration (INITIATE Hackathon)
+- **Wallet connection**: now uses Initia's own wallet system instead of MetaMask buttons. One "Connect Wallet" button opens InterwovenKit's wallet picker (supports Initia Wallet, social login via Privy, and browser wallets).
+- **Session signing**: new toggle in the left sidebar lets you enable "auto-sign" so you can place orders without a popup every time. Sign once, trade for a session.
+- **Bridge button**: the Initia Bridge link is now an in-app button that opens a bridge window pre-filled to send INIT from Initia L1 to MEV Shield.
+- **Wallet display**: shows .init username if you have one, otherwise shows truncated address. New "Wallet" button opens portfolio/settings.
+- **Submission files**: `.initia/submission.json` created with chain info, contract addresses, and feature flags.
+
+### Hackathon: INITIATE (Initia Hackathon Season 1)
+- **Deadline**: April 15, 2026, 11:59 PM UTC
+- **Track**: DeFi
+- **Required tech**: InterwovenKit (done), Initia-native feature (auto-sign + bridge, done), .initia/submission.json (done)
+- **Still needed**: updated README, demo video, testnet deployment (stretch goal)
+- **Calendar**: deadline added with 3-day reminder
+- **Reminders**: April 12 reminder set
+
+## NOT Tested (critical)
+- InterwovenKit wallet connection on live dev server (build passes, runtime untested)
+- Auto-sign enabling and disabling
+- Whether auto-sign actually skips popups for EVM contract calls via wagmi
+- Bridge modal opening with correct pre-fill
+- All existing transaction flows (approve, deposit, order) still working through new connector
+- .init username display
 
 ## Next Steps
-1. Open MetaMask, add Minitia network (chain ID 1411570067076288, RPC localhost:8545)
-2. Import deployer key, connect to localhost:3099
-3. Deposit tokens, place order in open batch, watch settlement
-4. Record demo video
-5. DoraHacks submission
+1. Start dev server and test InterwovenKit wallet connection
+2. Test all transaction flows work through new connector
+3. Test auto-sign toggle and verify EVM calls auto-sign
+4. Update README.md for hackathon submission
+5. Record demo video (use /demo-video 24h before deadline)
+6. Submit on DoraHacks
 
 ## Commands
 ```bash

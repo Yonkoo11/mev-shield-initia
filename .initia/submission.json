@@ -1,0 +1,29 @@
+{
+  "name": "MEV Shield",
+  "description": "Private batch auction DEX with MEV protection. Orders are sealed until batch settlement, preventing sandwich attacks and frontrunning. Built as its own Initia MiniEVM appchain where the sequencer enforces fair ordering by design.",
+  "track": "DeFi",
+  "chain": {
+    "type": "minievm",
+    "cosmos_chain_id": "mevshield-1",
+    "evm_chain_id": 1411570067076288,
+    "l1_chain_id": "initiation-2"
+  },
+  "contracts": {
+    "BatchAuction": "0x5dDAee13AAdFa374DBd62811412C280d78e1f9BB",
+    "ShieldSOL": "0x3cBb5A79CB5702b9AEc850D0C6c6F47F79200057",
+    "ShieldUSDC": "0x4A46e1e80e5e5718e9B2294d312AAc0fE4Bd2668"
+  },
+  "initia_features": {
+    "interwovenkit": true,
+    "autosign": true,
+    "interwoven_bridge": true
+  },
+  "tech_stack": {
+    "smart_contracts": "Solidity 0.8.24 (Foundry)",
+    "frontend": "Next.js 14, InterwovenKit, wagmi, viem, Tailwind CSS",
+    "settler": "TypeScript, ethers.js v6",
+    "chain": "Initia MiniEVM (minitia)"
+  },
+  "team_size": 1,
+  "repo": "https://github.com/yonkoo11/mev-shield-initia"
+}

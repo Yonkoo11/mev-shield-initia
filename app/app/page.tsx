@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useAccount, useConnect, useReadContract } from "wagmi";
+import { useAccount, useReadContract } from "wagmi";
+import { useInterwovenKit } from "@initia/interwovenkit-react";
 import { Header } from "../components/Header";
 import { ChainGuard } from "../components/ChainGuard";
 import { BATCH_AUCTION_ABI, BATCH_AUCTION_ADDRESS } from "../lib/contract";
@@ -12,10 +13,11 @@ import { BatchResult } from "../components/BatchResult";
 import { BalanceDisplay } from "../components/BalanceDisplay";
 import { PrivacyBadge } from "../components/PrivacyBadge";
 import { BridgePanel } from "../components/BridgePanel";
+import { AutoSignToggle } from "../components/AutoSignToggle";
 
 export default function Home() {
   const { isConnected } = useAccount();
-  const { connectors, connect } = useConnect();
+  const { openConnect } = useInterwovenKit();
 
   const { data: batchDuration } = useReadContract({
     address: BATCH_AUCTION_ADDRESS,
@@ -53,15 +55,12 @@ export default function Home() {
               settlement. No sandwich attacks.
             </p>
             <div className="flex gap-3 justify-center pt-2">
-              {connectors.map((connector) => (
-                <button
-                  key={connector.uid}
-                  onClick={() => connect({ connector })}
-                  className="bg-shield-accent text-shield-bg font-semibold rounded-lg px-6 py-3 text-sm hover:bg-shield-accent/90 transition-colors duration-150 ease-out"
-                >
-                  Connect {connector.name}
-                </button>
-              ))}
+              <button
+                onClick={openConnect}
+                className="bg-shield-accent text-shield-bg font-semibold rounded-lg px-6 py-3 text-sm hover:bg-shield-accent/90 transition-colors duration-150 ease-out"
+              >
+                Connect Wallet
+              </button>
             </div>
           </div>
 
@@ -164,6 +163,7 @@ export default function Home() {
             <div className="space-y-6 order-2 lg:order-1">
               <BalanceDisplay />
               <DepositPanel />
+              <AutoSignToggle />
               <BridgePanel />
             </div>
 
