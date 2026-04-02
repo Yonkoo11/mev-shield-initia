@@ -1,8 +1,29 @@
 # MEV Shield Initia - Progress
 
-## Status: Hybrid Design Built, Runtime Partially Verified (2026-04-02)
+## Status: Contract Security Fixed, Redeployed (2026-04-02)
 
-## What Changed (Plain English)
+## What Changed (Plain English) - Contract Security Fix (2026-04-02)
+
+The trading contract got a security overhaul:
+
+1. **Fair pricing fixed**: The old contract averaged the buyer's and seller's prices to set the clearing price, which meant putting in extreme prices could pull the final price in your favor. Now the clearing price is set at the sell-side marginal (the cheapest seller that crosses with a buyer), which makes gaming impossible. Your limit price only matters for whether you fill or not, not where the price lands.
+
+2. **Withdrawal protection**: Added a reentrancy guard so a malicious token contract can't trick the withdrawal function into paying out twice.
+
+3. **Only the settler can start and close batches**: Before, anyone could call openBatch(). Now only the designated settler address (or the owner) can open and settle batches. Regular users can only deposit, withdraw, place orders, and cancel.
+
+4. **Emergency pause works properly**: If something goes wrong and the owner pauses the contract, settlement still works (so open batches can be finalized and funds returned), but no new batches or orders can be created.
+
+5. **30 tests passing** (up from 14). New tests cover access control, pause behavior, multi-order clearing, and the uniform price algorithm.
+
+6. **Fresh deployment**: New contract addresses on local minitia. Frontend, settler, README, and submission.json all updated.
+
+### New Contract Addresses
+- BatchAuction: 0xaE94586b2735bB61a08085Ec0b42b01ca6B60fd8
+- shSOL (Token A): 0x17990Ea2Ba757fF731f41ae897C15D691A929d1F
+- shUSDC (Token B): 0x5e10E636230a5f6acc3D6a59e6f550040a506069
+
+### What Changed (Plain English) - Previous
 Three completely different design mockups for the app are now ready to open in a browser and compare:
 
 1. **The Vault** -- Picture a set of glowing rings with dots orbiting around them. Each dot is someone's order. A countdown ticks in the center. When it hits zero, the rings contract (the vault seals), a price is computed, and the rings pulse back out. The trading panel sits on the right side. Dark, dense, animated.
@@ -19,10 +40,10 @@ All three work as standalone pages you can open in any browser. Each has a landi
 - Settler: cycling every ~32s, 270+ batches without crash, logs at /tmp/settler.log
 - Frontend: dev server on :3099, logs at /tmp/nextdev.log
 
-## Deployed Contracts
-- BatchAuction: 0x5dDAee13AAdFa374DBd62811412C280d78e1f9BB
-- shSOL (Token A): 0x3cBb5A79CB5702b9AEc850D0C6c6F47F79200057 (18 decimals)
-- shUSDC (Token B): 0x4A46e1e80e5e5718e9B2294d312AAc0fE4Bd2668 (18 decimals)
+## Deployed Contracts (v2 - security fix)
+- BatchAuction: 0xaE94586b2735bB61a08085Ec0b42b01ca6B60fd8
+- shSOL (Token A): 0x17990Ea2Ba757fF731f41ae897C15D691A929d1F (18 decimals)
+- shUSDC (Token B): 0x5e10E636230a5f6acc3D6a59e6f550040a506069 (18 decimals)
 
 ## Test Accounts (all registered on chain with 1 wei)
 - Deployer/settler: 0x9aE2a08cA91d6C79047810304022de26605B0573
@@ -181,12 +202,13 @@ Reviewed all 3 proposals section-by-section as senior designer. Selected hybrid:
 - OrderDepth and BatchLifecycle rendering with mock data in connected state
 
 ### NEXT ACTION (resume here)
-1. Wire OrderDepth to real contract data (read getBuyOrder/getSellOrder from BatchAuction, replace mock arrays)
-2. Wire BatchLifecycle to real user order data (read hasOrder + order status per batch)
-3. Run /design Phase 4 (production polish via /ui-revamp)
-4. Open in real browser with wallet extension, test full connected flow
-5. Record demo video 24h before deadline
-6. Submit on DoraHacks
+1. Restart settler with new auction address (kill old, `cd settler && bun run start`)
+2. Wire OrderDepth to real contract data (read getBuyOrder/getSellOrder from BatchAuction, replace mock arrays)
+3. Wire BatchLifecycle to real user order data (read hasOrder + order status per batch)
+4. Run /design Phase 4 (production polish via /ui-revamp)
+5. Open in real browser with wallet extension, test full connected flow
+6. Record demo video 24h before deadline
+7. Submit on DoraHacks
 
 ### Infrastructure commands (copy-paste to restart)
 ```bash
