@@ -1,6 +1,6 @@
 # MEV Shield Initia - Progress
 
-## Status: Hybrid Design Selected, Building Production UI (2026-04-02)
+## Status: Hybrid Design Built, Runtime Partially Verified (2026-04-02)
 
 ## What Changed (Plain English)
 Three completely different design mockups for the app are now ready to open in a browser and compare:
@@ -165,8 +165,34 @@ Reviewed all 3 proposals section-by-section as senior designer. Selected hybrid:
 - hackathon.md: Phase 3c patched to evaluate autonomously instead of asking
 - These changes mean /design and /hackathon will never ask "which one?" again
 
-### NEXT: Build hybrid design as production Next.js components
-Transform selected hybrid into real app/components/*.tsx files. This means rewriting page.tsx layout to three-column crossing, creating depth bar components, adding navigation, integrating batch lifecycle section.
+### Runtime Verification (2026-04-02)
+- Landing page renders: YES (verified in browser, reads live contract data for batch stats)
+- InterwovenKit wallet modal opens: YES (shows Google/Email/X social login + Rabby/Phantom/Keplr/Leap/MetaMask)
+- Fixed "Chain not found: mevshield-1" error (use initiation-2 as InterwovenKit default, EVM works through wagmi regardless)
+- Minitia rollup: started via `weave rollup start`, producing blocks at height 1200+
+- Settler: running, connected, 30s batch cycle active
+- Console shows "2 errors" toast: pino-pretty module warning from WalletConnect (non-blocking, cosmetic only)
+
+### NOT verified (requires browser wallet extension)
+- Connected trading view three-column layout rendering
+- Deposit/withdraw/order flows through InterwovenKit connector
+- Auto-sign toggle enabling/disabling
+- Bridge modal pre-fill
+- OrderDepth and BatchLifecycle rendering with mock data in connected state
+
+### Remaining for hackathon submission (April 15)
+1. Open app in real browser with Initia Wallet or MetaMask, connect, verify trading view
+2. Place test orders to confirm full flow works through InterwovenKit
+3. Record demo video showing: connect -> deposit -> place orders -> batch settles -> results
+4. Submit on DoraHacks with .initia/submission.json + README + demo video
+
+### Post-hackathon (production)
+- Fix clearing algorithm (midpoint -> uniform crossing)
+- Add reentrancy guards, slippage protection, access control on openBatch
+- Replace mock data with live contract queries in OrderDepth/BatchLifecycle
+- Deploy to Initia testnet
+- Run /design Phase 4 (production polish) + Phase 5 (QA gate)
+- External security review
 
 ## Commands
 ```bash
