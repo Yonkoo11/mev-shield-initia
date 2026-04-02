@@ -1,6 +1,6 @@
 # MEV Shield Initia - Progress
 
-## Status: Design Proposals Ready for Review (2026-04-02)
+## Status: Hybrid Design Selected, Building Production UI (2026-04-02)
 
 ## What Changed (Plain English)
 Three completely different design mockups for the app are now ready to open in a browser and compare:
@@ -152,8 +152,21 @@ Hackathon deadline is still April 15. Current code compiles and can be submitted
 - dYdX (markets overview)
 - Astroport (swap page with 3D background)
 
-### NEXT: Run /design with competitive context
-Feed all competitor research + screenshots into /design to generate 3 distinct proposals for MEV Shield's interface. Then review segment-by-segment.
+### Design Review Complete (2026-04-02)
+Reviewed all 3 proposals section-by-section as senior designer. Selected hybrid:
+- P3 three-column crossing layout (buy depth left | order form + clearing price center | sell depth right)
+- P2 navigation (Trade/Bridge/History/Docs) + batch lifecycle visualization below trading view
+- P1 header stats bar + ring element as batch timer + teal accent color
+- Added: radial background depth from center, session signing above fold
+
+### System Updates Made (2026-04-02)
+- CLAUDE.md: Added "NEVER present options when you can evaluate" rule (permanent, loaded every turn)
+- MEMORY.md: feedback_autonomous_decisions.md saved
+- hackathon.md: Phase 3c patched to evaluate autonomously instead of asking
+- These changes mean /design and /hackathon will never ask "which one?" again
+
+### NEXT: Build hybrid design as production Next.js components
+Transform selected hybrid into real app/components/*.tsx files. This means rewriting page.tsx layout to three-column crossing, creating depth bar components, adding navigation, integrating batch lifecycle section.
 
 ## Commands
 ```bash
