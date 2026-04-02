@@ -21,7 +21,7 @@ export function BridgePanel() {
   return (
     <button
       onClick={handleBridge}
-      className="block w-full bg-shield-card border border-shield-border rounded-xl p-4 hover:border-shield-accent/30 transition-colors duration-150 ease-out group text-left"
+      className="block w-full bg-shield-card border border-shield-border rounded-lg p-4 hover:border-shield-accent/30 transition-colors duration-150 ease-out group text-left"
     >
       <div className="flex items-center gap-3">
         <div className="w-8 h-8 rounded-lg bg-shield-accent/10 flex items-center justify-center shrink-0">

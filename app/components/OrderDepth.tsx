@@ -34,7 +34,7 @@ function DepthRow({
   const isBuy = side === "buy";
 
   return (
-    <div className="relative flex items-center h-8 group">
+    <div className="relative flex items-center h-8 group hover:bg-white/[0.02] transition-colors duration-100">
       <div
         className="absolute inset-y-0 h-full"
         style={{

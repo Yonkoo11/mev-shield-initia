@@ -20,7 +20,7 @@ export function BalanceDisplay() {
   if (!isConnected) return null;
 
   return (
-    <div className="bg-shield-card border border-shield-border rounded-xl p-5">
+    <div className="bg-shield-card border border-shield-border rounded-lg p-5">
       <h3 className="text-sm font-medium text-shield-muted mb-4">
         Your Balance
       </h3>

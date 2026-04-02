@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useAccount, useDisconnect } from "wagmi";
 import { useInterwovenKit } from "@initia/interwovenkit-react";
 import { INITIA_CHAIN_ID } from "../lib/contract";
+import { useCurrentBatchId } from "../hooks/useBatchAuction";
 
 type NavTab = "trade" | "bridge" | "history" | "docs";
 
@@ -18,6 +19,7 @@ export function Header({ activeTab = "trade", onTabChange }: HeaderProps) {
   const { username, openConnect, openWallet, openBridge, autoSign } =
     useInterwovenKit();
   const [copied, setCopied] = useState(false);
+  const { currentBatchId } = useCurrentBatchId();
 
   const displayName =
     username ||
@@ -177,13 +179,13 @@ export function Header({ activeTab = "trade", onTabChange }: HeaderProps) {
           <div className="flex items-center gap-1.5">
             <span className="text-shield-muted">Batches Settled</span>
             <span className="font-mono tabular-nums text-shield-text font-medium">
-              270+
+              {currentBatchId !== undefined ? currentBatchId.toString() : "0"}
             </span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="text-shield-muted">24h Volume</span>
+            <span className="text-shield-muted">Pair</span>
             <span className="font-mono tabular-nums text-shield-text font-medium">
-              $48.2K
+              INIT/USDC
             </span>
           </div>
           <div className="flex items-center gap-1.5">
@@ -197,8 +199,8 @@ export function Header({ activeTab = "trade", onTabChange }: HeaderProps) {
               <span className="w-1.5 h-1.5 rounded-full bg-shield-accent" />
               Minitia
             </span>
-            <span className="hidden sm:inline text-shield-muted bg-shield-card px-2 py-0.5 rounded">
-              INIT/USDC
+            <span className="hidden sm:inline text-shield-muted bg-shield-card px-2 py-0.5 rounded font-mono text-[10px]">
+              30s batches
             </span>
           </div>
         </div>

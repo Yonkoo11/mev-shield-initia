@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
 import { parseUnits, formatUnits } from "viem";
-import { useSubmitOrder, useCancelOrder, useUserBalance } from "../hooks/useBatchAuction";
+import { useSubmitOrder, useCancelOrder, useUserBalance, useHasOrder } from "../hooks/useBatchAuction";
 import { TOKEN_DECIMALS, PRICE_DECIMALS } from "../lib/contract";
 import { parseContractError } from "../lib/errors";
 import { useToast } from "./Toast";
@@ -14,13 +14,17 @@ interface OrderFormProps {
 }
 
 export function OrderForm({ batchId, onOrderSubmitted }: OrderFormProps) {
-  const { isConnected } = useAccount();
+  const { isConnected, address } = useAccount();
   const toast = useToast();
   const [side, setSide] = useState<"buy" | "sell">("buy");
   const [price, setPrice] = useState("");
   const [amount, setAmount] = useState("");
 
   const { balance } = useUserBalance();
+  const { hasOrder: userHasOrder } = useHasOrder(
+    batchId !== null ? batchId : undefined,
+    address as `0x${string}` | undefined
+  );
 
   const {
     submitOrder,
@@ -102,7 +106,7 @@ export function OrderForm({ batchId, onOrderSubmitted }: OrderFormProps) {
   if (!isConnected) return null;
 
   return (
-    <div className="bg-shield-card border border-shield-border rounded-xl p-5">
+    <div className="bg-shield-card border border-shield-border rounded-lg p-5">
       <h3 className="text-sm font-medium text-shield-muted mb-4">
         Submit Order {batchId !== null ? `(Batch #${batchId.toString()})` : ""}
       </h3>
@@ -191,27 +195,35 @@ export function OrderForm({ batchId, onOrderSubmitted }: OrderFormProps) {
               </div>
             )}
 
-            <button
-              onClick={handleSubmit}
-              disabled={isPending || !price || !amount || priceInvalid || amountInvalid || insufficientBalance}
-              className={`w-full py-3 rounded-lg text-sm font-medium transition-colors duration-150 ease-out disabled:opacity-50 ${
-                side === "buy"
-                  ? "bg-shield-accent text-shield-bg hover:bg-shield-accent/90"
-                  : "bg-shield-red text-white hover:bg-shield-red/90"
-              }`}
-            >
-              {submitPending
-                ? "Submitting..."
-                : `${side === "buy" ? "Buy" : "Sell"} INIT`}
-            </button>
+            {userHasOrder ? (
+              <div className="w-full py-3 rounded-lg text-sm font-medium text-center bg-shield-accent/10 text-shield-accent border border-shield-accent/20">
+                Order active in this batch
+              </div>
+            ) : (
+              <button
+                onClick={handleSubmit}
+                disabled={isPending || !price || !amount || priceInvalid || amountInvalid || insufficientBalance}
+                className={`w-full py-3 rounded-lg text-sm font-medium transition-colors duration-150 ease-out disabled:opacity-50 ${
+                  side === "buy"
+                    ? "bg-shield-accent text-shield-bg hover:bg-shield-accent/90"
+                    : "bg-shield-red text-white hover:bg-shield-red/90"
+                }`}
+              >
+                {submitPending
+                  ? "Submitting..."
+                  : `${side === "buy" ? "Buy" : "Sell"} INIT`}
+              </button>
+            )}
 
-            <button
-              onClick={handleCancel}
-              disabled={cancelPending}
-              className="w-full py-2 rounded-lg text-xs font-medium text-shield-muted border border-shield-border hover:border-shield-red/30 hover:text-shield-red transition-colors duration-150 ease-out disabled:opacity-50"
-            >
-              {cancelPending ? "Cancelling..." : "Cancel My Order"}
-            </button>
+            {userHasOrder && (
+              <button
+                onClick={handleCancel}
+                disabled={cancelPending}
+                className="w-full py-2 rounded-lg text-xs font-medium text-shield-muted border border-shield-border hover:border-shield-red/30 hover:text-shield-red transition-colors duration-150 ease-out disabled:opacity-50"
+              >
+                {cancelPending ? "Cancelling..." : "Cancel My Order"}
+              </button>
+            )}
 
           </div>
         </>

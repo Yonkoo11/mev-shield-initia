@@ -133,7 +133,7 @@ export function DepositPanel() {
   if (!isConnected) return null;
 
   return (
-    <div className="bg-shield-card border border-shield-border rounded-xl p-5">
+    <div className="bg-shield-card border border-shield-border rounded-lg p-5">
       <div className="flex gap-1 bg-shield-bg rounded-lg p-1 mb-4">
         <button
           onClick={() => { setMode("deposit"); setApprovalStep("idle"); }}

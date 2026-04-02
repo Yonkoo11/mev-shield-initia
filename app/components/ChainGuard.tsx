@@ -13,7 +13,7 @@ export function ChainGuard({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex flex-col items-center justify-center mt-16 gap-6">
-      <div className="bg-shield-card border border-shield-red/30 rounded-xl p-6 max-w-md text-center space-y-4">
+      <div className="bg-shield-card border border-shield-red/30 rounded-lg p-6 max-w-md text-center space-y-4">
         <div className="w-12 h-12 mx-auto rounded-full bg-shield-red/20 flex items-center justify-center">
           <svg className="w-6 h-6 text-shield-red" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.27 16.5c-.77.833.192 2.5 1.732 2.5z" />
