@@ -8,7 +8,7 @@ interface DepthOrder {
 
 interface OrderDepthProps {
   side: "buy" | "sell";
-  orders: DepthOrder[];
+  orders?: DepthOrder[];
 }
 
 // Mock data for INIT/USDC around $4.28
@@ -93,7 +93,8 @@ function DepthRow({
   );
 }
 
-export function OrderDepth({ side, orders }: OrderDepthProps) {
+export function OrderDepth({ side, orders: ordersProp }: OrderDepthProps) {
+  const orders = ordersProp ?? (side === "buy" ? MOCK_BUY_ORDERS : MOCK_SELL_ORDERS);
   const maxTotal = Math.max(...orders.map((o) => o.total), 1);
   const isBuy = side === "buy";
 

@@ -12,12 +12,16 @@ import { BatchTimer } from "../components/BatchTimer";
 import { BatchResult } from "../components/BatchResult";
 import { BalanceDisplay } from "../components/BalanceDisplay";
 import { PrivacyBadge } from "../components/PrivacyBadge";
-import { BridgePanel } from "../components/BridgePanel";
 import { AutoSignToggle } from "../components/AutoSignToggle";
+import { OrderDepth } from "../components/OrderDepth";
+import { BatchLifecycle } from "../components/BatchLifecycle";
+
+type NavTab = "trade" | "bridge" | "history" | "docs";
 
 export default function Home() {
   const { isConnected } = useAccount();
   const { openConnect } = useInterwovenKit();
+  const [activeTab, setActiveTab] = useState<NavTab>("trade");
 
   const { data: batchDuration } = useReadContract({
     address: BATCH_AUCTION_ADDRESS,
@@ -39,35 +43,40 @@ export default function Home() {
   };
 
   return (
-    <main className="max-w-6xl mx-auto px-4 py-8">
-      <Header />
+    <main className="max-w-[1400px] mx-auto px-4 py-6">
+      <Header activeTab={activeTab} onTabChange={setActiveTab} />
 
       {!isConnected ? (
         <div className="mt-16 space-y-16">
           {/* Hero */}
           <div className="text-center space-y-6">
+            <span className="text-xs tracking-widest uppercase text-shield-accent/70">
+              Initia Appchain
+            </span>
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-[1.1]">
-              Trade without{" "}
-              <span className="text-shield-accent">MEV</span>
+              Where <span className="text-shield-cyan">buyers</span> meet{" "}
+              <span className="text-shield-coral">sellers</span>
+              <br />
+              at one fair price
             </h1>
-            <p className="text-shield-muted text-lg max-w-md mx-auto">
-              Private batch auctions on Initia. Orders sealed until
-              settlement. No sandwich attacks.
+            <p className="text-shield-muted text-lg max-w-lg mx-auto">
+              Every 30 seconds, all orders in the batch clear at a single
+              uniform price. No front-running. No sandwich attacks.
+              The crossing point is truth.
             </p>
             <div className="flex gap-3 justify-center pt-2">
               <button
                 onClick={openConnect}
                 className="bg-shield-accent text-shield-bg font-semibold rounded-lg px-6 py-3 text-sm hover:bg-shield-accent/90 transition-colors duration-150 ease-out"
               >
-                Connect Wallet
+                Start Trading
               </button>
             </div>
           </div>
 
-          {/* Features - asymmetric: 1 big left, 2 stacked right */}
+          {/* Feature cards */}
           <div className="max-w-4xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-              {/* Primary feature - takes 3 cols */}
               <div className="md:col-span-3 bg-shield-card border border-shield-border rounded-lg p-6 md:p-8 flex flex-col justify-between min-h-[200px]">
                 <div>
                   <div className="text-shield-accent mb-4">
@@ -101,10 +110,9 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Two smaller features stacked */}
               <div className="md:col-span-2 flex flex-col gap-4">
                 <div className="flex-1 bg-shield-card border border-shield-border rounded-lg p-5">
-                  <div className="text-shield-accent mb-3">
+                  <div className="text-shield-cyan mb-3">
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
@@ -115,34 +123,17 @@ export default function Home() {
                   </p>
                 </div>
                 <div className="flex-1 bg-shield-card border border-shield-border rounded-lg p-5">
-                  <div className="text-shield-accent mb-3">
+                  <div className="text-shield-coral mb-3">
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                   </div>
-                  <h3 className="font-semibold text-sm mb-1">Atomic on Initia</h3>
+                  <h3 className="font-semibold text-sm mb-1">Session Signing</h3>
                   <p className="text-xs text-shield-muted leading-relaxed">
-                    Settlement commits atomically on MiniEVM. No partial fills, no stuck orders.
+                    Sign once, trade for a session. No wallet popups interrupting your flow.
                   </p>
                 </div>
               </div>
-            </div>
-          </div>
-
-          {/* Compact flow */}
-          <div className="max-w-3xl mx-auto">
-            <div className="flex items-center justify-between gap-2 text-xs text-shield-muted">
-              {["Deposit", "Place Order", "Batch Closes", "Price Found", "Settlement"].map((step, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  {i > 0 && <div className="w-8 h-px bg-shield-border hidden md:block" />}
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-5 h-5 rounded-full bg-shield-accent/20 text-shield-accent font-mono text-[10px] flex items-center justify-center font-bold">
-                      {i + 1}
-                    </span>
-                    <span className="hidden md:inline">{step}</span>
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
 
@@ -150,29 +141,48 @@ export default function Home() {
         </div>
       ) : (
         <ChainGuard>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-            {/* Center column - first on mobile */}
-            <div className="space-y-6 order-1 lg:order-2">
-              <BatchTimer onBatchUpdate={handleBatchUpdate} />
-              <OrderForm
-                batchId={batchStatus === "open" ? activeBatchId : null}
-              />
-            </div>
+          {activeTab === "trade" && (
+            <div className="mt-6 space-y-6">
+              {/* Three-column crossing layout */}
+              <div className="grid grid-cols-1 lg:grid-cols-[1fr_minmax(340px,420px)_1fr] gap-4">
+                {/* Left: Buy order depth */}
+                <div className="order-2 lg:order-1">
+                  <OrderDepth side="buy" />
+                </div>
 
-            {/* Left column */}
-            <div className="space-y-6 order-2 lg:order-1">
-              <BalanceDisplay />
-              <DepositPanel />
-              <AutoSignToggle />
-              <BridgePanel />
-            </div>
+                {/* Center: Timer + Order form */}
+                <div className="space-y-4 order-1 lg:order-2">
+                  <BatchTimer onBatchUpdate={handleBatchUpdate} />
+                  <BalanceDisplay />
+                  <OrderForm
+                    batchId={batchStatus === "open" ? activeBatchId : null}
+                  />
+                  <AutoSignToggle />
+                </div>
 
-            {/* Right column */}
-            <div className="space-y-6 order-3">
+                {/* Right: Sell order depth */}
+                <div className="order-3">
+                  <OrderDepth side="sell" />
+                </div>
+              </div>
+
+              {/* Deposit panel (below the trading view) */}
+              <div className="max-w-md mx-auto">
+                <DepositPanel />
+              </div>
+
+              {/* Batch lifecycle + results */}
+              <BatchLifecycle />
               <BatchResult />
-              <PrivacyBadge />
             </div>
-          </div>
+          )}
+
+          {activeTab === "history" && (
+            <div className="mt-8 text-center text-shield-muted">
+              <p className="text-lg">Trade history coming soon</p>
+              <p className="text-sm mt-2">Past batch results and your order history will appear here.</p>
+            </div>
+          )}
         </ChainGuard>
       )}
     </main>
