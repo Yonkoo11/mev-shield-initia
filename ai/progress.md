@@ -218,10 +218,18 @@ Reviewed all 3 proposals section-by-section as senior designer. Selected hybrid:
 - OrderForm: cancel button conditional on hasOrder, shows "Order active" status
 - Design QA gate passed: 0 transition:all, 0 emojis, 0 rounded-xl, clean tsc
 
+### GitHub Pages Deployed (2026-04-02)
+- Live URL: https://yonkoo11.github.io/mev-shield-initia/
+- GitHub Actions workflow: auto-deploys on push to main
+- Landing page fully renders (hero, feature cards, connect button)
+- Connected trading view won't work on Pages (needs local minitia RPC)
+- Judges can see the design, branding, and landing experience immediately
+
 ### NEXT ACTION (resume here)
-1. Open in real browser with wallet extension, test full connected flow
+1. Open in real browser with wallet extension, test full connected flow (on localhost:3099)
 2. Record demo video 24h before deadline (April 14)
 3. Submit on DoraHacks by April 15 11:59 PM UTC
+4. Link live URL in submission: https://yonkoo11.github.io/mev-shield-initia/
 
 ### Infrastructure commands (copy-paste to restart)
 ```bash
