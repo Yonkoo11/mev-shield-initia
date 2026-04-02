@@ -225,11 +225,18 @@ Reviewed all 3 proposals section-by-section as senior designer. Selected hybrid:
 - Connected trading view won't work on Pages (needs local minitia RPC)
 - Judges can see the design, branding, and landing experience immediately
 
+### Bug Fixes & Judge Experience (2026-04-02)
+- Fixed React 19 useEffectEvent crash: removed webpack override, Turbopack resolves it correctly
+- Fixed infinite render loop in BatchTimer: useCallback + useRef + primitive deps
+- GitHub Pages graceful fallback: when chain unreachable, explains appchain with "Preview UI" button
+- Repo cleaned: removed .claude/, .ralph/, unrelated files from git tracking
+- 30/30 contract tests confirmed passing
+
 ### NEXT ACTION (resume here)
-1. Open in real browser with wallet extension, test full connected flow (on localhost:3099)
-2. Record demo video 24h before deadline (April 14)
-3. Submit on DoraHacks by April 15 11:59 PM UTC
-4. Link live URL in submission: https://yonkoo11.github.io/mev-shield-initia/
+1. Test full connected flow on localhost:3099 with Bob's test wallet in MetaMask
+2. Record demo video 24h before deadline (April 14) using /demo-video
+3. Submit on DoraHacks by April 15 11:59 PM UTC using /submit
+4. Live URL for submission: https://yonkoo11.github.io/mev-shield-initia/
 
 ### Infrastructure commands (copy-paste to restart)
 ```bash
