@@ -201,14 +201,20 @@ Reviewed all 3 proposals section-by-section as senior designer. Selected hybrid:
 - Bridge modal pre-fill
 - OrderDepth and BatchLifecycle rendering with mock data in connected state
 
+### Live Data Wiring Complete (2026-04-02)
+- New `useBatchOrders` hook: multicall reads all buy/sell orders via `useReadContracts`
+- OrderDepth: shows live depth bars from contract data (empty state when no orders in batch)
+- BatchLifecycle: shows connected user's own orders, sealed order count, and settlement results -- all from live contract state
+- All mock data removed from both components
+- Settler restarted with new auction address, cycling batches successfully (batch 390+)
+- Frontend dev server compiles and serves (InterwovenKit first-load takes ~2 minutes due to WalletConnect dependency tree)
+- TypeScript: clean
+
 ### NEXT ACTION (resume here)
-1. Restart settler with new auction address (kill old, `cd settler && bun run start`)
-2. Wire OrderDepth to real contract data (read getBuyOrder/getSellOrder from BatchAuction, replace mock arrays)
-3. Wire BatchLifecycle to real user order data (read hasOrder + order status per batch)
-4. Run /design Phase 4 (production polish via /ui-revamp)
-5. Open in real browser with wallet extension, test full connected flow
-6. Record demo video 24h before deadline
-7. Submit on DoraHacks
+1. Run /design Phase 4 (production polish via /ui-revamp)
+2. Open in real browser with wallet extension, test full connected flow
+3. Record demo video 24h before deadline
+4. Submit on DoraHacks
 
 ### Infrastructure commands (copy-paste to restart)
 ```bash
