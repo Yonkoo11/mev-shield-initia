@@ -49,8 +49,11 @@ export const TOKEN_A_DISPLAY = "INIT";
 export const TOKEN_B_DISPLAY = "USDC";
 
 // Initia Cosmos chain ID for InterwovenKit (distinct from EVM chain ID)
+// Uses initiation-2 (testnet L1) because our local minitia isn't registered
+// in the Initia registry. EVM calls work through wagmi regardless.
+// TODO: Register mevshield-1 in Initia registry for testnet deployment
 export const INITIA_CHAIN_ID =
-  process.env.NEXT_PUBLIC_INITIA_CHAIN_ID || "mevshield-1";
+  process.env.NEXT_PUBLIC_INITIA_CHAIN_ID || "initiation-2";
 
 // -- Full ABI --
 export const BATCH_AUCTION_ABI = [
