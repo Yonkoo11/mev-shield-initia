@@ -66,7 +66,7 @@ function DepthRow({
           {order.amount.toLocaleString(undefined, { maximumFractionDigits: 1 })}
         </span>
         <span
-          className={`font-mono tabular-nums text-shield-muted text-[11px] ${
+          className={`font-mono tabular-nums text-shield-muted text-xs ${
             isBuy ? "mr-3" : "ml-3"
           }`}
         >
@@ -93,7 +93,7 @@ export function OrderDepth({ side, orders: rawOrders }: OrderDepthProps) {
     <div className="flex flex-col h-full">
       {/* Column header */}
       <div
-        className={`flex items-center px-3 py-2 text-[11px] text-shield-muted uppercase tracking-wider ${
+        className={`flex items-center px-3 py-2 text-xs text-shield-muted uppercase tracking-wider ${
           isBuy ? "flex-row-reverse" : "flex-row"
         }`}
       >
@@ -123,7 +123,7 @@ export function OrderDepth({ side, orders: rawOrders }: OrderDepthProps) {
       {/* Side label */}
       <div className="px-3 py-2 border-t border-shield-border">
         <span
-          className={`text-[11px] font-medium uppercase tracking-wider ${
+          className={`text-xs font-medium uppercase tracking-wider ${
             isBuy ? "text-shield-cyan" : "text-shield-coral"
           }`}
         >

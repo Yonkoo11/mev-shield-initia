@@ -160,11 +160,11 @@ export function DepositPanel() {
       <div className="space-y-3">
         <div>
           <div className="flex items-center justify-between">
-            <label className="text-xs text-shield-muted">INIT Amount</label>
+            <label className="text-sm text-shield-muted">INIT Amount</label>
             {mode === "deposit" && (
               <button
                 onClick={() => setAmountA(formatUnits(walletBalA, TOKEN_DECIMALS))}
-                className="text-[10px] text-shield-accent hover:text-shield-accent/80"
+                className="text-xs text-shield-accent hover:text-shield-accent/80"
               >
                 Max: {fmt(walletBalA)}
               </button>
@@ -178,16 +178,16 @@ export function DepositPanel() {
             className="w-full mt-1 bg-shield-bg border border-shield-border rounded-lg px-3 py-2 text-base font-mono focus:outline-none focus:border-shield-accent"
           />
           {aExceedsBalance && (
-            <p className="text-[10px] text-shield-red mt-1">Exceeds wallet balance</p>
+            <p className="text-xs text-shield-red mt-1">Exceeds wallet balance</p>
           )}
         </div>
         <div>
           <div className="flex items-center justify-between">
-            <label className="text-xs text-shield-muted">USDC Amount</label>
+            <label className="text-sm text-shield-muted">USDC Amount</label>
             {mode === "deposit" && (
               <button
                 onClick={() => setAmountB(formatUnits(walletBalB, TOKEN_DECIMALS))}
-                className="text-[10px] text-shield-accent hover:text-shield-accent/80"
+                className="text-xs text-shield-accent hover:text-shield-accent/80"
               >
                 Max: {fmt(walletBalB)}
               </button>
@@ -201,7 +201,7 @@ export function DepositPanel() {
             className="w-full mt-1 bg-shield-bg border border-shield-border rounded-lg px-3 py-2 text-base font-mono focus:outline-none focus:border-shield-accent"
           />
           {bExceedsBalance && (
-            <p className="text-[10px] text-shield-red mt-1">Exceeds wallet balance</p>
+            <p className="text-xs text-shield-red mt-1">Exceeds wallet balance</p>
           )}
         </div>
         <button

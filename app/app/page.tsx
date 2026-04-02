@@ -11,7 +11,6 @@ import { OrderForm } from "../components/OrderForm";
 import { BatchTimer } from "../components/BatchTimer";
 import { BatchResult } from "../components/BatchResult";
 import { BalanceDisplay } from "../components/BalanceDisplay";
-import { PrivacyBadge } from "../components/PrivacyBadge";
 import { AutoSignToggle } from "../components/AutoSignToggle";
 import { OrderDepth } from "../components/OrderDepth";
 import { BatchLifecycle } from "../components/BatchLifecycle";
@@ -69,22 +68,18 @@ export default function Home() {
               Initia Appchain
             </span>
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-[1.1]">
-              Where <span className="text-shield-cyan">buyers</span> meet{" "}
-              <span className="text-shield-coral">sellers</span>
-              <br />
-              at one fair price
+              One price. Every order. Zero MEV.
             </h1>
             <p className="text-shield-muted text-lg max-w-lg mx-auto">
               Every 30 seconds, all orders in the batch clear at a single
               uniform price. No front-running. No sandwich attacks.
-              The crossing point is truth.
             </p>
             <div className="flex gap-3 justify-center pt-2">
               <button
                 onClick={openConnect}
                 className="bg-shield-accent text-shield-bg font-semibold rounded-lg px-6 py-3 text-sm hover:bg-shield-accent/90 transition-colors duration-150 ease-out"
               >
-                Start Trading
+                Connect Wallet
               </button>
             </div>
           </div>
@@ -151,8 +146,6 @@ export default function Home() {
               </div>
             </div>
           </div>
-
-          <PrivacyBadge />
         </div>
       ) : (
         <ChainGuard>

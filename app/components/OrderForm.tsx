@@ -149,7 +149,7 @@ export function OrderForm({ batchId, onOrderSubmitted }: OrderFormProps) {
 
           <div className="space-y-3">
             <div>
-              <label className="text-xs text-shield-muted">
+              <label className="text-sm text-shield-muted">
                 Limit Price (USDC per INIT)
               </label>
               <input
@@ -162,11 +162,11 @@ export function OrderForm({ batchId, onOrderSubmitted }: OrderFormProps) {
                 className="w-full mt-1 bg-shield-bg border border-shield-border rounded-lg px-3 py-2 text-base font-mono focus:outline-none focus:border-shield-accent"
               />
               {priceInvalid && (
-                <p className="text-[10px] text-shield-red mt-1">Price must be greater than 0</p>
+                <p className="text-sm text-shield-red mt-1">Price must be greater than 0</p>
               )}
             </div>
             <div>
-              <label className="text-xs text-shield-muted">Amount (INIT)</label>
+              <label className="text-sm text-shield-muted">Amount (INIT)</label>
               <input
                 type="number"
                 value={amount}
@@ -177,7 +177,7 @@ export function OrderForm({ batchId, onOrderSubmitted }: OrderFormProps) {
                 className="w-full mt-1 bg-shield-bg border border-shield-border rounded-lg px-3 py-2 text-base font-mono focus:outline-none focus:border-shield-accent"
               />
               {amountInvalid && (
-                <p className="text-[10px] text-shield-red mt-1">Amount must be greater than 0</p>
+                <p className="text-sm text-shield-red mt-1">Amount must be greater than 0</p>
               )}
             </div>
 

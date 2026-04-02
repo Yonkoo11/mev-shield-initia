@@ -32,7 +32,7 @@ export function AutoSignToggle() {
           <div className="flex items-center gap-2">
             <p className="text-sm font-medium text-shield-text">Session Signing</p>
             {isEnabled && (
-              <span className="text-[10px] text-shield-accent bg-shield-accent/10 px-1.5 py-0.5 rounded">
+              <span className="text-xs text-shield-accent bg-shield-accent/10 px-1.5 py-0.5 rounded">
                 Active
               </span>
             )}

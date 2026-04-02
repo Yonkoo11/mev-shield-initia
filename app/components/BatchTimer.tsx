@@ -113,12 +113,12 @@ export function BatchTimer({ onBatchUpdate }: BatchTimerProps) {
   return (
     <div className="flex flex-col items-center gap-3">
       <div className="flex items-center gap-2">
-        <span className="text-[11px] text-shield-muted uppercase tracking-wider">
+        <span className="text-xs text-shield-muted uppercase tracking-wider">
           {activeBatchId !== undefined
             ? `Batch #${activeBatchId.toString()}`
             : "No Active Batch"}
         </span>
-        <span className="text-[11px] text-shield-muted">
+        <span className="text-xs text-shield-muted">
           {orderCount}/20
         </span>
       </div>
@@ -191,15 +191,15 @@ export function BatchTimer({ onBatchUpdate }: BatchTimerProps) {
               {timeLeft}s
             </span>
           ) : batchStatus === "settling" ? (
-            <span className="text-[11px] text-shield-yellow font-medium">
+            <span className="text-xs text-shield-yellow font-medium">
               Settling
             </span>
           ) : batchStatus === "settled" ? (
-            <span className="text-[11px] text-shield-accent font-medium">
+            <span className="text-xs text-shield-accent font-medium">
               Settled
             </span>
           ) : (
-            <span className="text-[11px] text-shield-muted">
+            <span className="text-xs text-shield-muted">
               Waiting
             </span>
           )}
@@ -207,7 +207,7 @@ export function BatchTimer({ onBatchUpdate }: BatchTimerProps) {
       </div>
 
       <span
-        className={`text-[11px] font-medium ${
+        className={`text-xs font-medium ${
           batchStatus === "open" && !isUrgent
             ? "text-shield-accent"
             : batchStatus === "open" && isUrgent

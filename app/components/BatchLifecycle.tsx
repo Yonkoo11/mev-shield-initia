@@ -79,7 +79,7 @@ export function BatchLifecycle({
           <span className="text-sm font-medium text-shield-text">
             Batch Lifecycle
           </span>
-          <span className="text-[11px] text-shield-muted bg-shield-bg px-2 py-0.5 rounded">
+          <span className="text-xs text-shield-muted bg-shield-bg px-2 py-0.5 rounded">
             How it works
           </span>
         </div>
@@ -92,10 +92,10 @@ export function BatchLifecycle({
           <div className="bg-shield-bg rounded-lg p-3">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-2 h-2 rounded-full bg-shield-accent" />
-              <span className="text-[11px] font-medium text-shield-accent uppercase tracking-wider">
+              <span className="text-xs font-medium text-shield-accent uppercase tracking-wider">
                 Your Orders
               </span>
-              <span className="text-[10px] text-shield-muted ml-auto">
+              <span className="text-xs text-shield-muted ml-auto">
                 visible to you
               </span>
             </div>
@@ -115,14 +115,14 @@ export function BatchLifecycle({
                           : "bg-shield-coral-dim border-shield-coral/20 text-shield-coral"
                       }`}
                     >
-                      <span className="font-medium uppercase text-[10px]">
+                      <span className="font-medium uppercase text-xs">
                         {isBuy ? "buy" : "sell"}
                       </span>
                       <span>{formatAmount(order.amount)}</span>
                       <span className="text-shield-muted">@</span>
                       <span>${formatPrice(order.limitPrice)}</span>
                       {isSettled && (
-                        <span className={`text-[10px] ml-1 ${
+                        <span className={`text-xs ml-1 ${
                           statusLabel === "filled" ? "text-shield-accent" : "text-shield-red"
                         }`}>
                           {statusLabel}
@@ -145,10 +145,10 @@ export function BatchLifecycle({
           <div className="bg-shield-bg rounded-lg p-3">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-2 h-2 rounded-full bg-shield-accent/50" />
-              <span className="text-[11px] font-medium text-shield-muted uppercase tracking-wider">
+              <span className="text-xs font-medium text-shield-muted uppercase tracking-wider">
                 Sealed Batch
               </span>
-              <span className="text-[10px] text-shield-muted ml-auto">
+              <span className="text-xs text-shield-muted ml-auto">
                 opaque to all
               </span>
             </div>
@@ -169,7 +169,7 @@ export function BatchLifecycle({
               )}
             </div>
             {totalOrderCount > 0 && (
-              <p className="text-[11px] text-shield-muted mt-2">
+              <p className="text-xs text-shield-muted mt-2">
                 {totalOrderCount} order{totalOrderCount !== 1 ? "s" : ""} sealed. No one can see prices or amounts until settlement.
               </p>
             )}
@@ -181,7 +181,7 @@ export function BatchLifecycle({
           <div className="bg-shield-bg rounded-lg p-3">
             <div className="flex items-center gap-2 mb-2">
               <div className={`w-2 h-2 rounded-full ${isSettled ? "bg-shield-accent" : "bg-shield-yellow"}`} />
-              <span className={`text-[11px] font-medium uppercase tracking-wider ${isSettled ? "text-shield-accent" : "text-shield-yellow"}`}>
+              <span className={`text-xs font-medium uppercase tracking-wider ${isSettled ? "text-shield-accent" : "text-shield-yellow"}`}>
                 {isSettled ? "Settled Results" : batchStatus === "settling" ? "Settling..." : "Pending"}
               </span>
             </div>

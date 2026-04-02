@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useAccount, useDisconnect } from "wagmi";
 import { useInterwovenKit } from "@initia/interwovenkit-react";
 import { INITIA_CHAIN_ID } from "../lib/contract";
-import { useCurrentBatchId } from "../hooks/useBatchAuction";
 
 type NavTab = "trade" | "bridge" | "history" | "docs";
 
@@ -19,7 +18,7 @@ export function Header({ activeTab = "trade", onTabChange }: HeaderProps) {
   const { username, openConnect, openWallet, openBridge, autoSign } =
     useInterwovenKit();
   const [copied, setCopied] = useState(false);
-  const { currentBatchId } = useCurrentBatchId();
+
 
   const displayName =
     username ||
@@ -109,7 +108,7 @@ export function Header({ activeTab = "trade", onTabChange }: HeaderProps) {
           {isConnected && address ? (
             <div className="flex items-center gap-2">
               {isAutoSigning && (
-                <span className="text-[10px] text-shield-accent bg-shield-accent/10 px-1.5 py-0.5 rounded hidden sm:inline">
+                <span className="text-xs text-shield-accent bg-shield-accent/10 px-1.5 py-0.5 rounded hidden sm:inline">
                   Auto-Sign
                 </span>
               )}
@@ -173,38 +172,6 @@ export function Header({ activeTab = "trade", onTabChange }: HeaderProps) {
         </div>
       </div>
 
-      {/* Stats bar (only when connected) */}
-      {isConnected && (
-        <div className="flex items-center gap-6 pb-3 text-[11px]">
-          <div className="flex items-center gap-1.5">
-            <span className="text-shield-muted">Batches Settled</span>
-            <span className="font-mono tabular-nums text-shield-text font-medium">
-              {currentBatchId !== undefined ? currentBatchId.toString() : "0"}
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-shield-muted">Pair</span>
-            <span className="font-mono tabular-nums text-shield-text font-medium">
-              INIT/USDC
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-shield-muted">MEV Saved</span>
-            <span className="font-mono tabular-nums text-shield-accent font-medium">
-              $0.00
-            </span>
-          </div>
-          <div className="ml-auto flex items-center gap-1.5">
-            <span className="text-[10px] text-shield-accent/60 bg-shield-accent/10 px-1.5 py-0.5 rounded flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-shield-accent" />
-              Minitia
-            </span>
-            <span className="hidden sm:inline text-shield-muted bg-shield-card px-2 py-0.5 rounded font-mono text-[10px]">
-              30s batches
-            </span>
-          </div>
-        </div>
-      )}
     </header>
   );
 }
