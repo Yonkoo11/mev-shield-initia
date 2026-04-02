@@ -180,11 +180,20 @@ Reviewed all 3 proposals section-by-section as senior designer. Selected hybrid:
 - Bridge modal pre-fill
 - OrderDepth and BatchLifecycle rendering with mock data in connected state
 
-### Remaining for hackathon submission (April 15)
-1. Open app in real browser with Initia Wallet or MetaMask, connect, verify trading view
-2. Place test orders to confirm full flow works through InterwovenKit
-3. Record demo video showing: connect -> deposit -> place orders -> batch settles -> results
-4. Submit on DoraHacks with .initia/submission.json + README + demo video
+### NEXT ACTION (resume here)
+1. Wire OrderDepth to real contract data (read getBuyOrder/getSellOrder from BatchAuction, replace mock arrays)
+2. Wire BatchLifecycle to real user order data (read hasOrder + order status per batch)
+3. Run /design Phase 4 (production polish via /ui-revamp)
+4. Open in real browser with wallet extension, test full connected flow
+5. Record demo video 24h before deadline
+6. Submit on DoraHacks
+
+### Infrastructure commands (copy-paste to restart)
+```bash
+weave rollup start                                    # minitia rollup
+cd ~/Projects/mev-shield-initia/settler && bun run start  # settler
+cd ~/Projects/mev-shield-initia/app && npx next dev -p 3099  # frontend
+```
 
 ### Post-hackathon (production)
 - Fix clearing algorithm (midpoint -> uniform crossing)
