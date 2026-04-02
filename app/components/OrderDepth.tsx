@@ -1,5 +1,9 @@
 "use client";
 
+import { PRICE_SCALE, TOKEN_DECIMALS, TOKEN_A_DISPLAY, TOKEN_B_DISPLAY } from "../lib/contract";
+import type { OrderData } from "../hooks/useBatchAuction";
+import { formatUnits } from "viem";
+
 interface DepthOrder {
   price: number;
   amount: number;
@@ -8,31 +12,14 @@ interface DepthOrder {
 
 interface OrderDepthProps {
   side: "buy" | "sell";
-  orders?: DepthOrder[];
+  orders?: OrderData[];
 }
 
-// Mock data for INIT/USDC around $4.28
-export const MOCK_BUY_ORDERS: DepthOrder[] = [
-  { price: 4.32, amount: 2400, total: 10368 },
-  { price: 4.30, amount: 1800, total: 7740 },
-  { price: 4.29, amount: 1500, total: 6435 },
-  { price: 4.28, amount: 3200, total: 13696 },
-  { price: 4.27, amount: 1100, total: 4697 },
-  { price: 4.25, amount: 800, total: 3400 },
-  { price: 4.22, amount: 500, total: 2110 },
-  { price: 4.20, amount: 300, total: 1260 },
-];
-
-export const MOCK_SELL_ORDERS: DepthOrder[] = [
-  { price: 4.30, amount: 150, total: 645 },
-  { price: 4.31, amount: 400, total: 1724 },
-  { price: 4.33, amount: 800, total: 3464 },
-  { price: 4.35, amount: 1200, total: 5220 },
-  { price: 4.38, amount: 1500, total: 6570 },
-  { price: 4.40, amount: 2000, total: 8800 },
-  { price: 4.45, amount: 2500, total: 11125 },
-  { price: 4.50, amount: 1300, total: 5850 },
-];
+function toDepthOrder(raw: OrderData): DepthOrder {
+  const price = Number(raw.limitPrice) / Number(PRICE_SCALE);
+  const amount = Number(formatUnits(raw.amount, TOKEN_DECIMALS));
+  return { price, amount, total: price * amount };
+}
 
 function DepthRow({
   order,
@@ -48,7 +35,6 @@ function DepthRow({
 
   return (
     <div className="relative flex items-center h-8 group">
-      {/* Background bar */}
       <div
         className="absolute inset-y-0 h-full"
         style={{
@@ -60,8 +46,6 @@ function DepthRow({
           left: isBuy ? undefined : 0,
         }}
       />
-
-      {/* Content row */}
       <div
         className={`relative z-10 flex items-center w-full px-3 text-[13px] ${
           isBuy ? "flex-row-reverse" : "flex-row"
@@ -79,24 +63,31 @@ function DepthRow({
             isBuy ? "mr-auto" : "ml-auto"
           }`}
         >
-          {order.amount.toLocaleString()}
+          {order.amount.toLocaleString(undefined, { maximumFractionDigits: 1 })}
         </span>
         <span
           className={`font-mono tabular-nums text-shield-muted text-[11px] ${
             isBuy ? "mr-3" : "ml-3"
           }`}
         >
-          ${order.total.toLocaleString()}
+          ${order.total.toLocaleString(undefined, { maximumFractionDigits: 0 })}
         </span>
       </div>
     </div>
   );
 }
 
-export function OrderDepth({ side, orders: ordersProp }: OrderDepthProps) {
-  const orders = ordersProp ?? (side === "buy" ? MOCK_BUY_ORDERS : MOCK_SELL_ORDERS);
-  const maxTotal = Math.max(...orders.map((o) => o.total), 1);
+export function OrderDepth({ side, orders: rawOrders }: OrderDepthProps) {
   const isBuy = side === "buy";
+  const hasLiveData = rawOrders && rawOrders.length > 0;
+
+  const orders: DepthOrder[] = hasLiveData
+    ? rawOrders.map(toDepthOrder)
+    : [];
+
+  const maxTotal = orders.length > 0
+    ? Math.max(...orders.map((o) => o.total), 1)
+    : 1;
 
   return (
     <div className="flex flex-col h-full">
@@ -107,20 +98,26 @@ export function OrderDepth({ side, orders: ordersProp }: OrderDepthProps) {
         }`}
       >
         <span className={isBuy ? "ml-auto" : "mr-auto"}>Price</span>
-        <span className={isBuy ? "mr-auto" : "ml-auto"}>Amount</span>
-        <span className={isBuy ? "mr-3" : "ml-3"}>Total</span>
+        <span className={isBuy ? "mr-auto" : "ml-auto"}>{TOKEN_A_DISPLAY}</span>
+        <span className={isBuy ? "mr-3" : "ml-3"}>{TOKEN_B_DISPLAY}</span>
       </div>
 
       {/* Depth rows */}
       <div className="flex-1 flex flex-col gap-px">
-        {orders.map((order, i) => (
-          <DepthRow
-            key={`${side}-${i}`}
-            order={order}
-            maxTotal={maxTotal}
-            side={side}
-          />
-        ))}
+        {orders.length > 0 ? (
+          orders.map((order, i) => (
+            <DepthRow
+              key={`${side}-${i}`}
+              order={order}
+              maxTotal={maxTotal}
+              side={side}
+            />
+          ))
+        ) : (
+          <div className="flex items-center justify-center h-24 text-[12px] text-shield-muted">
+            {isBuy ? "No buy orders" : "No sell orders"}
+          </div>
+        )}
       </div>
 
       {/* Side label */}
@@ -131,6 +128,9 @@ export function OrderDepth({ side, orders: ordersProp }: OrderDepthProps) {
           }`}
         >
           {isBuy ? "Buy Orders" : "Sell Orders"}
+          {orders.length > 0 && (
+            <span className="text-shield-muted ml-1">({orders.length})</span>
+          )}
         </span>
       </div>
     </div>

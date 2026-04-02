@@ -1,6 +1,6 @@
 "use client";
 
-import { useReadContract, useWriteContract, useAccount } from "wagmi";
+import { useReadContract, useReadContracts, useWriteContract, useAccount } from "wagmi";
 import {
   BATCH_AUCTION_ABI,
   BATCH_AUCTION_ADDRESS,
@@ -144,6 +144,89 @@ export function useSellOrder(batchId: bigint | undefined, index: number) {
       : null,
     refetch,
   };
+}
+
+// -- Read: all orders in a batch (multicall) --
+export interface OrderData {
+  user: `0x${string}`;
+  side: number;
+  limitPrice: bigint;
+  amount: bigint;
+  filledPrice: bigint;
+  status: number; // 0=None, 1=Pending, 2=Filled, 3=Unfilled
+}
+
+export function useBatchOrders(
+  batchId: bigint | undefined,
+  buyCount: number,
+  sellCount: number
+) {
+  // Build multicall contracts array for all buy orders
+  const buyContracts = Array.from({ length: buyCount }, (_, i) => ({
+    address: BATCH_AUCTION_ADDRESS,
+    abi: BATCH_AUCTION_ABI,
+    functionName: "getBuyOrder" as const,
+    args: [batchId!, i] as const,
+  }));
+
+  // Build multicall contracts array for all sell orders
+  const sellContracts = Array.from({ length: sellCount }, (_, i) => ({
+    address: BATCH_AUCTION_ADDRESS,
+    abi: BATCH_AUCTION_ABI,
+    functionName: "getSellOrder" as const,
+    args: [batchId!, i] as const,
+  }));
+
+  const allContracts = [...buyContracts, ...sellContracts];
+  const enabled = batchId !== undefined && allContracts.length > 0;
+
+  const { data, refetch, isLoading } = useReadContracts({
+    contracts: enabled ? allContracts : [],
+    query: {
+      enabled,
+      refetchInterval: 5000,
+    },
+  });
+
+  const buyOrders: OrderData[] = [];
+  const sellOrders: OrderData[] = [];
+
+  if (data) {
+    for (let i = 0; i < buyCount; i++) {
+      const result = data[i];
+      if (result?.status === "success" && result.result) {
+        const r = result.result as readonly [
+          `0x${string}`, number, bigint, bigint, bigint, number
+        ];
+        buyOrders.push({
+          user: r[0],
+          side: r[1],
+          limitPrice: r[2],
+          amount: r[3],
+          filledPrice: r[4],
+          status: r[5],
+        });
+      }
+    }
+    for (let i = 0; i < sellCount; i++) {
+      const result = data[buyCount + i];
+      if (result?.status === "success" && result.result) {
+        const r = result.result as readonly [
+          `0x${string}`, number, bigint, bigint, bigint, number
+        ];
+        sellOrders.push({
+          user: r[0],
+          side: r[1],
+          limitPrice: r[2],
+          amount: r[3],
+          filledPrice: r[4],
+          status: r[5],
+        });
+      }
+    }
+  }
+
+  return { buyOrders, sellOrders, refetch, isLoading };
 }
 
 // -- Read: token addresses --

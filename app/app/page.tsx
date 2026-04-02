@@ -15,11 +15,12 @@ import { PrivacyBadge } from "../components/PrivacyBadge";
 import { AutoSignToggle } from "../components/AutoSignToggle";
 import { OrderDepth } from "../components/OrderDepth";
 import { BatchLifecycle } from "../components/BatchLifecycle";
+import { useBatch, useBatchOrders } from "../hooks/useBatchAuction";
 
 type NavTab = "trade" | "bridge" | "history" | "docs";
 
 export default function Home() {
-  const { isConnected } = useAccount();
+  const { isConnected, address } = useAccount();
   const { openConnect } = useInterwovenKit();
   const [activeTab, setActiveTab] = useState<NavTab>("trade");
 
@@ -41,6 +42,20 @@ export default function Home() {
     setActiveBatchId(batchId);
     setBatchStatus(status);
   };
+
+  // Fetch batch details for order counts
+  const { batch } = useBatch(
+    activeBatchId !== null ? activeBatchId : undefined
+  );
+  const buyCount = batch ? Number(batch.buyCount) : 0;
+  const sellCount = batch ? Number(batch.sellCount) : 0;
+
+  // Fetch all orders in the current batch via multicall
+  const { buyOrders, sellOrders } = useBatchOrders(
+    activeBatchId !== null ? activeBatchId : undefined,
+    buyCount,
+    sellCount
+  );
 
   return (
     <main className="max-w-[1400px] mx-auto px-4 py-6">
@@ -147,7 +162,7 @@ export default function Home() {
               <div className="grid grid-cols-1 lg:grid-cols-[1fr_minmax(340px,420px)_1fr] gap-4">
                 {/* Left: Buy order depth */}
                 <div className="order-2 lg:order-1">
-                  <OrderDepth side="buy" />
+                  <OrderDepth side="buy" orders={buyOrders} />
                 </div>
 
                 {/* Center: Timer + Order form */}
@@ -162,7 +177,7 @@ export default function Home() {
 
                 {/* Right: Sell order depth */}
                 <div className="order-3">
-                  <OrderDepth side="sell" />
+                  <OrderDepth side="sell" orders={sellOrders} />
                 </div>
               </div>
 
@@ -172,7 +187,13 @@ export default function Home() {
               </div>
 
               {/* Batch lifecycle + results */}
-              <BatchLifecycle />
+              <BatchLifecycle
+                clearingPrice={batch?.clearingPrice}
+                buyOrders={buyOrders}
+                sellOrders={sellOrders}
+                userAddress={address}
+                batchStatus={batchStatus}
+              />
               <BatchResult />
             </div>
           )}
