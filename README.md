@@ -75,10 +75,13 @@ On a shared chain, you can't control transaction ordering without trusting someo
 - Opens batches, waits for expiry, triggers settlement
 - ~100 lines of ethers.js v6
 
-**Frontend** (`app/`) -- Next.js 14 + wagmi + viem
-- Dark trading UI with real-time batch countdown
-- Deposit/withdraw, limit order submission, batch results
-- Auto-signing via Initia's InterwovenKit (no wallet popups)
+**Frontend** (`app/`) -- Next.js 14 + InterwovenKit + wagmi + viem
+- Three-column crossing layout: buy depth | order form + clearing price | sell depth
+- Batch lifecycle visualization (your orders -> sealed batch -> settlement results)
+- InterwovenKit wallet connection (social login, Initia Wallet, MetaMask, Keplr, etc.)
+- Auto-signing via InterwovenKit `enableAutoSign` (no wallet popups)
+- Interwoven Bridge integration (in-app cross-chain bridging)
+- SVG ring countdown timer for batch lifecycle
 
 ## Clearing Price Algorithm
 
@@ -104,8 +107,20 @@ Example:
 | Feature | How We Use It |
 |---------|--------------|
 | **MiniEVM Rollup** | Dedicated chain = dedicated transaction ordering = no MEV by design |
-| **Auto-signing** | Orders submit without wallet popups (InterwovenKit `enableAutoSign`) |
-| **Interwoven Bridge** | Bridge INIT from L1 to the rollup to start trading |
+| **InterwovenKit** | `@initia/interwovenkit-react` for wallet connection, social login (Google/Email/X), multi-wallet support |
+| **Auto-signing** | Session signing via `enableAutoSign` removes wallet popups for active traders |
+| **Interwoven Bridge** | In-app `openBridge()` for bridging INIT from Initia L1 to the MEV Shield rollup |
+| **.init Usernames** | InterwovenKit displays `.init` usernames when connected (via `useInterwovenKit().username`) |
+
+## Deployed Contracts (local Minitia)
+
+| Contract | Address |
+|----------|---------|
+| BatchAuction | `0x5dDAee13AAdFa374DBd62811412C280d78e1f9BB` |
+| ShieldSOL (Token A) | `0x3cBb5A79CB5702b9AEc850D0C6c6F47F79200057` |
+| ShieldUSDC (Token B) | `0x4A46e1e80e5e5718e9B2294d312AAc0fE4Bd2668` |
+
+Chain ID (EVM): `1411570067076288` | Chain ID (Cosmos): `mevshield-1`
 
 ## Quick Start
 
@@ -124,22 +139,33 @@ cd settler && bun install && bun run start
 
 ```
 mev-shield-initia/
-├── contracts/          # Foundry project
+├── .initia/            # Hackathon submission metadata
+│   └── submission.json
+├── contracts/          # Foundry project (Solidity 0.8.24)
 │   ├── src/
-│   │   ├── BatchAuction.sol
-│   │   ├── ShieldSOL.sol
-│   │   └── ShieldUSDC.sol
+│   │   ├── BatchAuction.sol     (core DEX, 7 write functions)
+│   │   ├── ShieldSOL.sol        (ERC20 token A)
+│   │   └── ShieldUSDC.sol       (ERC20 token B)
 │   ├── test/
 │   │   └── BatchAuction.t.sol   (14 tests)
 │   └── script/
 │       └── Deploy.s.sol
-├── settler/            # Crank service
-│   └── src/index.ts
-├── app/                # Next.js frontend
-│   ├── components/     (8 components)
-│   ├── hooks/          (wagmi hooks)
-│   └── lib/            (ABI + config)
-└── ai/                 # Dev notes
+├── settler/            # Off-chain crank service
+│   └── src/index.ts    (ethers.js v6, batch open/settle cycle)
+├── app/                # Next.js 14 frontend
+│   ├── app/            (layout, page, providers w/ InterwovenKit)
+│   ├── components/     (11 components)
+│   │   ├── OrderDepth.tsx       (buy/sell depth bars)
+│   │   ├── BatchLifecycle.tsx   (3-stage order flow viz)
+│   │   ├── BatchTimer.tsx       (SVG ring countdown)
+│   │   ├── AutoSignToggle.tsx   (session signing)
+│   │   ├── OrderForm.tsx        (limit order entry)
+│   │   ├── DepositPanel.tsx     (token deposit/withdraw)
+│   │   └── ...
+│   ├── hooks/          (wagmi contract hooks)
+│   └── lib/            (ABI, addresses, config)
+├── proposals/          # 3 design proposals (HTML mockups)
+└── ai/                 # Architecture docs + progress
 ```
 
 ## License
