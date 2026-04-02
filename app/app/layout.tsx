@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Space_Grotesk } from "next/font/google";
+import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { ToastProvider } from "../components/Toast";
@@ -8,6 +8,12 @@ const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-sans",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-mono",
 });
 
 const siteUrl =
@@ -50,7 +56,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${spaceGrotesk.variable} min-h-screen bg-shield-bg antialiased font-sans`}>
+      <body className={`${spaceGrotesk.variable} ${jetbrainsMono.variable} min-h-screen bg-shield-bg antialiased font-sans`}>
         <Providers>
           <ToastProvider>{children}</ToastProvider>
         </Providers>
