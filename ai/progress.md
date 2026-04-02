@@ -210,11 +210,18 @@ Reviewed all 3 proposals section-by-section as senior designer. Selected hybrid:
 - Frontend dev server compiles and serves (InterwovenKit first-load takes ~2 minutes due to WalletConnect dependency tree)
 - TypeScript: clean
 
+### Production Polish Complete (2026-04-02)
+- Live batch count in header (reads currentBatchId from contract)
+- Removed fake volume/MEV stats, replaced with honest labels
+- Consistent rounded-lg on all 9 card components (was mixed rounded-xl/lg)
+- OrderDepth hover highlights on rows
+- OrderForm: cancel button conditional on hasOrder, shows "Order active" status
+- Design QA gate passed: 0 transition:all, 0 emojis, 0 rounded-xl, clean tsc
+
 ### NEXT ACTION (resume here)
-1. Run /design Phase 4 (production polish via /ui-revamp)
-2. Open in real browser with wallet extension, test full connected flow
-3. Record demo video 24h before deadline
-4. Submit on DoraHacks
+1. Open in real browser with wallet extension, test full connected flow
+2. Record demo video 24h before deadline (April 14)
+3. Submit on DoraHacks by April 15 11:59 PM UTC
 
 ### Infrastructure commands (copy-paste to restart)
 ```bash
