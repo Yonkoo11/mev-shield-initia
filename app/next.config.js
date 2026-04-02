@@ -5,9 +5,5 @@ const nextConfig = {
   basePath: isGhPages ? "/mev-shield-initia" : "",
   assetPrefix: isGhPages ? "/mev-shield-initia/" : "",
   images: { unoptimized: true },
-  webpack: (config) => {
-    config.resolve.fallback = { fs: false, path: false, os: false };
-    return config;
-  },
 };
 module.exports = nextConfig;

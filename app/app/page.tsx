@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useAccount, useReadContract } from "wagmi";
 import { useInterwovenKit } from "@initia/interwovenkit-react";
 import { Header } from "../components/Header";
@@ -38,10 +38,10 @@ export default function Home() {
   const [activeBatchId, setActiveBatchId] = useState<bigint | null>(null);
   const [batchStatus, setBatchStatus] = useState<string>("loading");
 
-  const handleBatchUpdate = (batchId: bigint | null, status: string) => {
+  const handleBatchUpdate = useCallback((batchId: bigint | null, status: string) => {
     setActiveBatchId(batchId);
     setBatchStatus(status);
-  };
+  }, []);
 
   // Fetch batch details for order counts
   const { batch } = useBatch(

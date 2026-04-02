@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useAccount } from "wagmi";
 import {
   useCurrentBatchId,
@@ -23,43 +23,50 @@ export function BatchTimer({ onBatchUpdate }: BatchTimerProps) {
   const [activeBatchId, setActiveBatchId] = useState<bigint | undefined>(undefined);
   const [batchStatus, setBatchStatus] = useState<string>("loading");
 
+  // Stable ref for callback to avoid re-triggering effects
+  const onBatchUpdateRef = useRef(onBatchUpdate);
+  onBatchUpdateRef.current = onBatchUpdate;
+
+  // Track currentBatchId changes
   useEffect(() => {
     if (currentBatchId !== undefined && currentBatchId > 0n) {
       setActiveBatchId(currentBatchId - 1n);
     } else {
       setActiveBatchId(undefined);
       setBatchStatus("no_batch");
-      onBatchUpdate?.(null, "no_batch");
+      onBatchUpdateRef.current?.(null, "no_batch");
     }
-  }, [currentBatchId, onBatchUpdate]);
+  }, [currentBatchId]);
 
   const { batch, refetch: refetchBatch } = useBatch(activeBatchId);
 
+  // Track batch status changes (use primitive values to avoid object-reference churn)
+  const batchStatusNum = batch?.status;
+  const batchCloseAt = batch ? Number(batch.closeAt) : 0;
+  const batchOpenAt = batch ? Number(batch.openAt) : 0;
+
   useEffect(() => {
-    if (!batch || activeBatchId === undefined) {
+    if (batchStatusNum === undefined || activeBatchId === undefined) {
       setBatchStatus("no_batch");
-      onBatchUpdate?.(null, "no_batch");
+      onBatchUpdateRef.current?.(null, "no_batch");
       return;
     }
 
-    const status = batch.status;
-
-    if (status === 1) {
+    if (batchStatusNum === 1) {
       const now = Math.floor(Date.now() / 1000);
-      const closeAt = Number(batch.closeAt);
-      const remaining = Math.max(0, closeAt - now);
+      const remaining = Math.max(0, batchCloseAt - now);
       setTimeLeft(remaining);
       setBatchStatus("open");
-      onBatchUpdate?.(activeBatchId, "open");
-    } else if (status === 2) {
+      onBatchUpdateRef.current?.(activeBatchId, "open");
+    } else if (batchStatusNum === 2) {
       setBatchStatus("settled");
       setTimeLeft(0);
-      onBatchUpdate?.(activeBatchId, "settled");
+      onBatchUpdateRef.current?.(activeBatchId, "settled");
     } else {
       setBatchStatus("no_batch");
-      onBatchUpdate?.(null, "no_batch");
+      onBatchUpdateRef.current?.(null, "no_batch");
     }
-  }, [batch, activeBatchId, onBatchUpdate]);
+  }, [batchStatusNum, batchCloseAt, activeBatchId]);
 
   // Countdown ticker
   useEffect(() => {
@@ -77,19 +84,17 @@ export function BatchTimer({ onBatchUpdate }: BatchTimerProps) {
   useEffect(() => {
     if (timeLeft !== 0 || batchStatus !== "open") return;
     setBatchStatus("settling");
-    onBatchUpdate?.(activeBatchId ?? null, "settling");
+    onBatchUpdateRef.current?.(activeBatchId ?? null, "settling");
 
     const pollInterval = setInterval(() => {
       refetchBatch();
     }, 2000);
 
     return () => clearInterval(pollInterval);
-  }, [timeLeft, batchStatus, activeBatchId, onBatchUpdate, refetchBatch]);
+  }, [timeLeft, batchStatus, activeBatchId, refetchBatch]);
 
-  // Calculate progress using openAt and closeAt
-  const openAt = batch ? Number(batch.openAt) : 0;
-  const closeAt = batch ? Number(batch.closeAt) : 0;
-  const totalDuration = closeAt - openAt;
+  // Calculate progress
+  const totalDuration = batchCloseAt - batchOpenAt;
   const progress = timeLeft !== null && totalDuration > 0
     ? ((totalDuration - timeLeft) / totalDuration)
     : 0;
@@ -99,7 +104,6 @@ export function BatchTimer({ onBatchUpdate }: BatchTimerProps) {
     ? Number(batch.buyCount) + Number(batch.sellCount)
     : 0;
 
-  // SVG ring offset: full circle = circumference, empty = 0
   const ringOffset = RING_CIRCUMFERENCE * (1 - Math.min(progress, 1));
 
   if (!isConnected) return null;
@@ -108,7 +112,6 @@ export function BatchTimer({ onBatchUpdate }: BatchTimerProps) {
 
   return (
     <div className="flex flex-col items-center gap-3">
-      {/* Batch label */}
       <div className="flex items-center gap-2">
         <span className="text-[11px] text-shield-muted uppercase tracking-wider">
           {activeBatchId !== undefined
@@ -120,7 +123,6 @@ export function BatchTimer({ onBatchUpdate }: BatchTimerProps) {
         </span>
       </div>
 
-      {/* Ring timer */}
       <div className="relative">
         <svg
           width={RING_SIZE}
@@ -128,7 +130,6 @@ export function BatchTimer({ onBatchUpdate }: BatchTimerProps) {
           viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`}
           className="transform -rotate-90"
         >
-          {/* Background ring */}
           <circle
             cx={RING_SIZE / 2}
             cy={RING_SIZE / 2}
@@ -137,7 +138,6 @@ export function BatchTimer({ onBatchUpdate }: BatchTimerProps) {
             stroke="var(--color-border)"
             strokeWidth={RING_STROKE}
           />
-          {/* Progress ring */}
           {batchStatus === "open" && timeLeft !== null && timeLeft > 0 && (
             <circle
               cx={RING_SIZE / 2}
@@ -152,7 +152,6 @@ export function BatchTimer({ onBatchUpdate }: BatchTimerProps) {
               className="transition-[stroke-dashoffset] duration-1000 ease-out"
             />
           )}
-          {/* Settling ring: pulsing full circle */}
           {batchStatus === "settling" && (
             <circle
               cx={RING_SIZE / 2}
@@ -167,7 +166,6 @@ export function BatchTimer({ onBatchUpdate }: BatchTimerProps) {
               className="animate-pulse"
             />
           )}
-          {/* Settled ring: full teal */}
           {batchStatus === "settled" && (
             <circle
               cx={RING_SIZE / 2}
@@ -183,18 +181,15 @@ export function BatchTimer({ onBatchUpdate }: BatchTimerProps) {
           )}
         </svg>
 
-        {/* Center content */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           {batchStatus === "open" && timeLeft !== null && timeLeft > 0 ? (
-            <>
-              <span
-                className={`text-xl font-mono font-bold tabular-nums leading-none ${
-                  isUrgent ? "text-shield-red" : "text-shield-text"
-                }`}
-              >
-                {timeLeft}s
-              </span>
-            </>
+            <span
+              className={`text-xl font-mono font-bold tabular-nums leading-none ${
+                isUrgent ? "text-shield-red" : "text-shield-text"
+              }`}
+            >
+              {timeLeft}s
+            </span>
           ) : batchStatus === "settling" ? (
             <span className="text-[11px] text-shield-yellow font-medium">
               Settling
@@ -211,7 +206,6 @@ export function BatchTimer({ onBatchUpdate }: BatchTimerProps) {
         </div>
       </div>
 
-      {/* Status text */}
       <span
         className={`text-[11px] font-medium ${
           batchStatus === "open" && !isUrgent
