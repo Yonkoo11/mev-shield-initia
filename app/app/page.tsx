@@ -63,21 +63,23 @@ export default function Home() {
       {!isConnected ? (
         <div className="mt-16 space-y-16">
           {/* Hero */}
-          <div className="text-center space-y-6">
-            <span className="text-xs tracking-widest uppercase text-shield-accent/70">
+          <div className="relative text-center space-y-6">
+            {/* Ambient glow behind hero */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-shield-accent/[0.03] rounded-full blur-[100px] pointer-events-none" />
+            <span className="relative text-xs tracking-widest uppercase text-shield-accent/70">
               Initia Appchain
             </span>
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-[1.1]">
+            <h1 className="relative text-5xl md:text-7xl font-bold tracking-tight leading-[1.1]">
               One price. Every order. Zero MEV.
             </h1>
-            <p className="text-shield-muted text-lg max-w-lg mx-auto">
+            <p className="relative text-shield-muted text-lg max-w-lg mx-auto">
               Every 30 seconds, all orders in the batch clear at a single
               uniform price. No front-running. No sandwich attacks.
             </p>
-            <div className="flex gap-3 justify-center pt-2">
+            <div className="relative flex gap-3 justify-center pt-2">
               <button
                 onClick={openConnect}
-                className="bg-shield-accent text-shield-bg font-semibold rounded-lg px-6 py-3 text-sm hover:bg-shield-accent/90 transition-colors duration-150 ease-out"
+                className="bg-shield-accent text-shield-bg font-semibold rounded-lg px-6 py-3 text-sm hover:bg-shield-accent/90 shadow-[0_0_30px_rgba(0,212,170,0.15)] hover:shadow-[0_0_40px_rgba(0,212,170,0.25)] transition-all duration-200 ease-out"
               >
                 Connect Wallet
               </button>

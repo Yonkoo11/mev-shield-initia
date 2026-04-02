@@ -4,10 +4,12 @@
 
 /* --- Design Tokens (CSS custom properties) --- */
 :root {
-  --color-bg: #0a0b10;
-  --color-bg-light: #12141a;
-  --color-card: #12121a;
-  --color-border: #1e1e2e;
+  --color-bg: #08090e;
+  --color-bg-light: #0f1118;
+  --color-card: #111320;
+  --color-card-hover: #161830;
+  --color-border: #1c1e30;
+  --color-border-hover: #2a2d45;
   --color-accent: #00d4aa;
   --color-accent-dim: rgba(0, 212, 170, 0.06);
   --color-cyan: #06b6d4;
@@ -39,16 +41,22 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Radial gradient background: lighter center, darker edges */
+/* Layered background: radial gradient + accent ambient glow */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background: radial-gradient(
-    ellipse 60% 50% at 50% 40%,
-    var(--color-bg-light) 0%,
-    var(--color-bg) 70%
-  );
+  background:
+    radial-gradient(
+      ellipse 50% 40% at 50% 0%,
+      rgba(0, 212, 170, 0.04) 0%,
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 80% 60% at 50% 30%,
+      var(--color-bg-light) 0%,
+      var(--color-bg) 80%
+    );
   z-index: -2;
   pointer-events: none;
 }
@@ -61,7 +69,7 @@ body::after {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
   background-repeat: repeat;
   background-size: 256px 256px;
-  opacity: 0.02;
+  opacity: 0.03;
   pointer-events: none;
   z-index: 9999;
 }
@@ -98,7 +106,7 @@ button[class*="connect"] {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #2a2a3e;
+  background: var(--color-border-hover);
 }
 
 /* Transitions for interactive elements */

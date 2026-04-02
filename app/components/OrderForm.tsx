@@ -106,7 +106,7 @@ export function OrderForm({ batchId, onOrderSubmitted }: OrderFormProps) {
   if (!isConnected) return null;
 
   return (
-    <div className="bg-shield-card border border-shield-border rounded-lg p-5">
+    <div className="bg-shield-card border border-shield-border rounded-lg p-5 shadow-[0_0_40px_rgba(0,212,170,0.04)]">
       <h3 className="text-sm font-medium text-shield-muted mb-4">
         Submit Order {batchId !== null ? `(Batch #${batchId.toString()})` : ""}
       </h3>

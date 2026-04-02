@@ -14,10 +14,12 @@ const config: Config = {
       },
       colors: {
         shield: {
-          bg: "#0a0b10",
-          "bg-light": "#12141a",
-          card: "#12121a",
-          border: "#1e1e2e",
+          bg: "#08090e",
+          "bg-light": "#0f1118",
+          card: "#111320",
+          "card-hover": "#161830",
+          border: "#1c1e30",
+          "border-hover": "#2a2d45",
           accent: "#00d4aa",
           accentDim: "#00d4aa33",
           cyan: "#06b6d4",
