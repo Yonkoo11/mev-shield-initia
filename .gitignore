@@ -27,3 +27,5 @@ bun.lockb
 contracts/lib/
 contracts/cache/
 contracts/broadcast/
+.claude/
+.ralph/
