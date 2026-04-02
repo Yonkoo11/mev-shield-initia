@@ -11,6 +11,11 @@ interface BatchTimerProps {
   onBatchUpdate?: (batchId: bigint | null, status: string) => void;
 }
 
+const RING_SIZE = 88;
+const RING_STROKE = 3;
+const RING_RADIUS = (RING_SIZE - RING_STROKE) / 2;
+const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
+
 export function BatchTimer({ onBatchUpdate }: BatchTimerProps) {
   const { isConnected } = useAccount();
   const { currentBatchId } = useCurrentBatchId();
@@ -86,7 +91,7 @@ export function BatchTimer({ onBatchUpdate }: BatchTimerProps) {
   const closeAt = batch ? Number(batch.closeAt) : 0;
   const totalDuration = closeAt - openAt;
   const progress = timeLeft !== null && totalDuration > 0
-    ? ((totalDuration - timeLeft) / totalDuration) * 100
+    ? ((totalDuration - timeLeft) / totalDuration)
     : 0;
 
   const isUrgent = timeLeft !== null && timeLeft <= 5 && timeLeft > 0;
@@ -94,62 +99,140 @@ export function BatchTimer({ onBatchUpdate }: BatchTimerProps) {
     ? Number(batch.buyCount) + Number(batch.sellCount)
     : 0;
 
+  // SVG ring offset: full circle = circumference, empty = 0
+  const ringOffset = RING_CIRCUMFERENCE * (1 - Math.min(progress, 1));
+
   if (!isConnected) return null;
 
+  const ringColor = isUrgent ? "var(--color-red)" : "var(--color-accent)";
+
   return (
-    <div className="bg-shield-card border border-shield-border rounded-xl p-5">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-medium text-shield-muted">
+    <div className="flex flex-col items-center gap-3">
+      {/* Batch label */}
+      <div className="flex items-center gap-2">
+        <span className="text-[11px] text-shield-muted uppercase tracking-wider">
           {activeBatchId !== undefined
             ? `Batch #${activeBatchId.toString()}`
             : "No Active Batch"}
-        </h3>
-        <span className="text-xs text-shield-muted">
-          {orderCount}/20 orders
+        </span>
+        <span className="text-[11px] text-shield-muted">
+          {orderCount}/20
         </span>
       </div>
 
-      {batchStatus === "open" && timeLeft !== null && timeLeft > 0 ? (
-        <>
-          <div className="w-full h-2 bg-shield-bg rounded-full overflow-hidden mb-3">
-            <div
-              className={`h-full rounded-full transition-[width] duration-1000 ease-out ${
-                isUrgent ? "bg-shield-red" : "bg-shield-accent"
-              }`}
-              style={{ width: `${Math.min(progress, 100)}%` }}
+      {/* Ring timer */}
+      <div className="relative">
+        <svg
+          width={RING_SIZE}
+          height={RING_SIZE}
+          viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`}
+          className="transform -rotate-90"
+        >
+          {/* Background ring */}
+          <circle
+            cx={RING_SIZE / 2}
+            cy={RING_SIZE / 2}
+            r={RING_RADIUS}
+            fill="none"
+            stroke="var(--color-border)"
+            strokeWidth={RING_STROKE}
+          />
+          {/* Progress ring */}
+          {batchStatus === "open" && timeLeft !== null && timeLeft > 0 && (
+            <circle
+              cx={RING_SIZE / 2}
+              cy={RING_SIZE / 2}
+              r={RING_RADIUS}
+              fill="none"
+              stroke={ringColor}
+              strokeWidth={RING_STROKE}
+              strokeDasharray={RING_CIRCUMFERENCE}
+              strokeDashoffset={ringOffset}
+              strokeLinecap="round"
+              className="transition-[stroke-dashoffset] duration-1000 ease-out"
             />
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-shield-muted">
-              {isUrgent ? "Closing soon!" : "Accepting orders"}
+          )}
+          {/* Settling ring: pulsing full circle */}
+          {batchStatus === "settling" && (
+            <circle
+              cx={RING_SIZE / 2}
+              cy={RING_SIZE / 2}
+              r={RING_RADIUS}
+              fill="none"
+              stroke="var(--color-yellow)"
+              strokeWidth={RING_STROKE}
+              strokeDasharray={RING_CIRCUMFERENCE}
+              strokeDashoffset={0}
+              opacity={0.6}
+              className="animate-pulse"
+            />
+          )}
+          {/* Settled ring: full teal */}
+          {batchStatus === "settled" && (
+            <circle
+              cx={RING_SIZE / 2}
+              cy={RING_SIZE / 2}
+              r={RING_RADIUS}
+              fill="none"
+              stroke="var(--color-accent)"
+              strokeWidth={RING_STROKE}
+              strokeDasharray={RING_CIRCUMFERENCE}
+              strokeDashoffset={0}
+              opacity={0.4}
+            />
+          )}
+        </svg>
+
+        {/* Center content */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          {batchStatus === "open" && timeLeft !== null && timeLeft > 0 ? (
+            <>
+              <span
+                className={`text-xl font-mono font-bold tabular-nums leading-none ${
+                  isUrgent ? "text-shield-red" : "text-shield-text"
+                }`}
+              >
+                {timeLeft}s
+              </span>
+            </>
+          ) : batchStatus === "settling" ? (
+            <span className="text-[11px] text-shield-yellow font-medium">
+              Settling
             </span>
-            <span
-              className={`text-2xl font-mono font-bold tabular-nums ${
-                isUrgent ? "text-shield-red" : "text-shield-text"
-              }`}
-            >
-              {timeLeft}s
+          ) : batchStatus === "settled" ? (
+            <span className="text-[11px] text-shield-accent font-medium">
+              Settled
             </span>
-          </div>
-        </>
-      ) : batchStatus === "settling" ? (
-        <div className="text-center py-2">
-          <div className="flex items-center justify-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-shield-yellow animate-pulse" />
-            <span className="text-shield-yellow text-sm">Settling batch...</span>
-          </div>
+          ) : (
+            <span className="text-[11px] text-shield-muted">
+              Waiting
+            </span>
+          )}
         </div>
-      ) : batchStatus === "settled" ? (
-        <div className="text-center py-2">
-          <span className="text-shield-accent text-sm">Batch settled</span>
-        </div>
-      ) : (
-        <div className="text-center py-2">
-          <span className="text-shield-muted text-sm">
-            Waiting for next batch...
-          </span>
-        </div>
-      )}
+      </div>
+
+      {/* Status text */}
+      <span
+        className={`text-[11px] font-medium ${
+          batchStatus === "open" && !isUrgent
+            ? "text-shield-accent"
+            : batchStatus === "open" && isUrgent
+            ? "text-shield-red"
+            : batchStatus === "settling"
+            ? "text-shield-yellow"
+            : "text-shield-muted"
+        }`}
+      >
+        {batchStatus === "open" && !isUrgent
+          ? "Accepting orders"
+          : batchStatus === "open" && isUrgent
+          ? "Closing soon!"
+          : batchStatus === "settling"
+          ? "Settling batch..."
+          : batchStatus === "settled"
+          ? "Batch settled"
+          : "Waiting for next batch"}
+      </span>
     </div>
   );
 }
