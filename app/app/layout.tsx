@@ -17,7 +17,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://mev-shield-initia.netlify.app";
+  process.env.NEXT_PUBLIC_SITE_URL || "https://yonkoo11.github.io/mev-shield-initia";
 
 export const metadata: Metadata = {
   title: "MEV Shield | Private Batch Auction DEX on Initia",
