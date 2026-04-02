@@ -36,7 +36,7 @@ On a shared chain, you can't control transaction ordering without trusting someo
    └─ Settler calls settleBatch()
    └─ Contract walks sorted buy (DESC) and sell (ASC) arrays
    └─ Finds supply-demand crossing point
-   └─ Clearing price = midpoint of crossing
+   └─ Clearing price = sell-side marginal at crossing
 
 3. Settlement
    └─ Orders at or better than clearing price: FILLED at clearing price
@@ -54,7 +54,7 @@ On a shared chain, you can't control transaction ordering without trusting someo
 │  │ BatchAuction  │  │shINIT  │  │shUSDC  │  │
 │  │   .sol        │  │(ERC20) │  │(ERC20) │  │
 │  │ 7 functions   │  └────────┘  └────────┘  │
-│  │ 14 tests pass │                          │
+│  │ 30 tests pass │                          │
 │  └──────────────┘                           │
 └─────────────────────────────────────────────┘
         ▲                    ▲
@@ -85,7 +85,7 @@ On a shared chain, you can't control transaction ordering without trusting someo
 
 ## Clearing Price Algorithm
 
-Ported from our [Solana implementation](https://github.com/yonkoo11/mev-shield) (9 passing tests on devnet).
+Uniform clearing at the sell-side marginal price. This is the standard call auction convention used by traditional exchanges.
 
 ```
 Given: buyOrders sorted by price DESC, sellOrders sorted by price ASC
@@ -93,13 +93,18 @@ Given: buyOrders sorted by price DESC, sellOrders sorted by price ASC
 1. Walk both arrays simultaneously
 2. Accumulate volume on each side
 3. Stop when buy price < sell price (no more crossing)
-4. Clearing price = (last crossing buy price + last crossing sell price) / 2
+4. Clearing price = sell-side marginal (the cheapest seller that still crosses)
 
 Example:
   Alice sells 100 @ 120    Bob buys 100 @ 150
   Crossing exists (150 >= 120)
-  Clearing price = (150 + 120) / 2 = 135
-  Both fill at 135. Alice gets more than her minimum. Bob pays less than his maximum.
+  Clearing price = 120 (sell-side marginal)
+  Alice fills at her limit. Bob pays 120 instead of his 150 max. Both sides get fair execution.
+
+Why not midpoint?
+  Midpoint (135) creates a gaming incentive: submit extreme limit prices to pull
+  the clearing price in your favor. Marginal pricing makes the limit price irrelevant
+  once it crosses. You get the uniform price regardless of how aggressive your limit was.
 ```
 
 ## Initia Features Used
@@ -147,7 +152,7 @@ mev-shield-initia/
 │   │   ├── ShieldSOL.sol        (ERC20 token A)
 │   │   └── ShieldUSDC.sol       (ERC20 token B)
 │   ├── test/
-│   │   └── BatchAuction.t.sol   (14 tests)
+│   │   └── BatchAuction.t.sol   (30 tests)
 │   └── script/
 │       └── Deploy.s.sol
 ├── settler/            # Off-chain crank service
