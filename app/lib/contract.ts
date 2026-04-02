@@ -25,17 +25,17 @@ export const minitia = defineChain({
 // -- Deployed Contract Addresses (env-driven with deployed defaults) --
 export const BATCH_AUCTION_ADDRESS = (
   process.env.NEXT_PUBLIC_AUCTION_ADDRESS ||
-  "0x5dDAee13AAdFa374DBd62811412C280d78e1f9BB"
+  "0xaE94586b2735bB61a08085Ec0b42b01ca6B60fd8"
 ) as `0x${string}`;
 
 export const SHIELD_SOL_ADDRESS = (
   process.env.NEXT_PUBLIC_TOKEN_A_ADDRESS ||
-  "0x3cBb5A79CB5702b9AEc850D0C6c6F47F79200057"
+  "0x17990Ea2Ba757fF731f41ae897C15D691A929d1F"
 ) as `0x${string}`;
 
 export const SHIELD_USDC_ADDRESS = (
   process.env.NEXT_PUBLIC_TOKEN_B_ADDRESS ||
-  "0x4A46e1e80e5e5718e9B2294d312AAc0fE4Bd2668"
+  "0x5e10E636230a5f6acc3D6a59e6f550040a506069"
 ) as `0x${string}`;
 
 // -- Constants matching the Solidity contract --
@@ -59,6 +59,7 @@ export const INITIA_CHAIN_ID =
 export const BATCH_AUCTION_ABI = [
   // --- Errors ---
   { type: "error", name: "NotOwner", inputs: [] },
+  { type: "error", name: "NotSettler", inputs: [] },
   { type: "error", name: "AlreadyInitialized", inputs: [] },
   { type: "error", name: "Paused", inputs: [] },
   { type: "error", name: "InvalidAmount", inputs: [] },
@@ -70,6 +71,7 @@ export const BATCH_AUCTION_ABI = [
   { type: "error", name: "AlreadyHasOrder", inputs: [] },
   { type: "error", name: "NoOrder", inputs: [] },
   { type: "error", name: "NoOrders", inputs: [] },
+  { type: "error", name: "SlippageExceeded", inputs: [] },
 
   // --- Events ---
   {
@@ -135,6 +137,37 @@ export const BATCH_AUCTION_ABI = [
       { name: "filled", type: "uint8", indexed: false },
       { name: "unfilled", type: "uint8", indexed: false },
     ],
+  },
+  {
+    type: "event",
+    name: "SettlerUpdated",
+    inputs: [
+      { name: "oldSettler", type: "address", indexed: true },
+      { name: "newSettler", type: "address", indexed: true },
+    ],
+  },
+  {
+    type: "event",
+    name: "PauseToggled",
+    inputs: [
+      { name: "paused", type: "bool", indexed: false },
+    ],
+  },
+
+  // --- Admin Functions ---
+  {
+    type: "function",
+    name: "setSettler",
+    stateMutability: "nonpayable",
+    inputs: [{ name: "_settler", type: "address" }],
+    outputs: [],
+  },
+  {
+    type: "function",
+    name: "togglePause",
+    stateMutability: "nonpayable",
+    inputs: [],
+    outputs: [],
   },
 
   // --- Write Functions ---
@@ -321,6 +354,13 @@ export const BATCH_AUCTION_ABI = [
     stateMutability: "view",
     inputs: [],
     outputs: [{ name: "", type: "bool" }],
+  },
+  {
+    type: "function",
+    name: "settler",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ name: "", type: "address" }],
   },
   {
     type: "function",

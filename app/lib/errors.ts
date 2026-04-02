@@ -9,8 +9,10 @@ const ERROR_MESSAGES: Record<string, string> = {
   InvalidAmount: "Amount must be greater than zero",
   InvalidPrice: "Price must be greater than zero",
   NotOwner: "Only the contract owner can perform this action",
+  NotSettler: "Only the settler can open and settle batches",
   Paused: "Trading is currently paused",
   AlreadyInitialized: "Contract is already initialized",
+  SlippageExceeded: "Order would fill at a price outside your slippage tolerance",
 };
 
 export function parseContractError(error: any): string {

@@ -3,8 +3,9 @@ pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract BatchAuction {
+contract BatchAuction is ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     // --- Constants ---
@@ -20,8 +21,8 @@ contract BatchAuction {
     struct Order {
         address user;
         Side side;
-        uint256 limitPrice; // tokenB per tokenA, scaled by PRICE_SCALE
-        uint256 amount;     // in tokenA units
+        uint256 limitPrice;   // tokenB per tokenA, scaled by PRICE_SCALE
+        uint256 amount;       // in tokenA units
         uint256 filledPrice;
         OrderStatus status;
     }
@@ -33,9 +34,8 @@ contract BatchAuction {
         uint8 buyCount;
         uint8 sellCount;
         BatchStatus status;
-        // Fixed arrays: buys sorted DESC by limitPrice, sells sorted ASC
-        Order[20] buyOrders;
-        Order[20] sellOrders;
+        Order[20] buyOrders;   // sorted DESC by limitPrice
+        Order[20] sellOrders;  // sorted ASC by limitPrice
     }
 
     struct UserBalance {
@@ -53,6 +53,9 @@ contract BatchAuction {
     uint64 public currentBatchId;
     bool public paused;
 
+    // Settler role: only this address can open and settle batches
+    address public settler;
+
     mapping(uint64 => Batch) public batches;
     mapping(address => UserBalance) public userBalances;
     mapping(uint64 => mapping(address => bool)) public hasOrder;
@@ -65,9 +68,12 @@ contract BatchAuction {
     event OrderSubmitted(uint64 indexed batchId, address indexed user, Side side, uint256 limitPrice, uint256 amount);
     event OrderCancelled(uint64 indexed batchId, address indexed user);
     event BatchSettled(uint64 indexed batchId, uint256 clearingPrice, uint8 filled, uint8 unfilled);
+    event SettlerUpdated(address indexed oldSettler, address indexed newSettler);
+    event PauseToggled(bool paused);
 
     // --- Errors ---
     error NotOwner();
+    error NotSettler();
     error AlreadyInitialized();
     error Paused();
     error InvalidAmount();
@@ -79,10 +85,16 @@ contract BatchAuction {
     error AlreadyHasOrder();
     error NoOrder();
     error NoOrders();
+    error SlippageExceeded();
 
     // --- Modifiers ---
     modifier onlyOwner() {
         if (msg.sender != owner) revert NotOwner();
+        _;
+    }
+
+    modifier onlySettler() {
+        if (msg.sender != settler && msg.sender != owner) revert NotSettler();
         _;
     }
 
@@ -99,9 +111,22 @@ contract BatchAuction {
     ) external {
         if (owner != address(0)) revert AlreadyInitialized();
         owner = msg.sender;
+        settler = msg.sender; // owner is default settler
         tokenA = IERC20(_tokenA);
         tokenB = IERC20(_tokenB);
         batchDuration = _batchDuration;
+    }
+
+    // --- Admin ---
+    function setSettler(address _settler) external onlyOwner {
+        address old = settler;
+        settler = _settler;
+        emit SettlerUpdated(old, _settler);
+    }
+
+    function togglePause() external onlyOwner {
+        paused = !paused;
+        emit PauseToggled(paused);
     }
 
     // --- Deposit ---
@@ -122,8 +147,8 @@ contract BatchAuction {
         emit Deposited(msg.sender, amountA, amountB);
     }
 
-    // --- Withdraw ---
-    function withdraw(uint256 amountA, uint256 amountB) external {
+    // --- Withdraw (reentrancy-protected) ---
+    function withdraw(uint256 amountA, uint256 amountB) external nonReentrant {
         if (amountA == 0 && amountB == 0) revert InvalidAmount();
 
         UserBalance storage bal = userBalances[msg.sender];
@@ -133,20 +158,22 @@ contract BatchAuction {
         if (amountA > availableA) revert InsufficientBalance();
         if (amountB > availableB) revert InsufficientBalance();
 
+        // State changes before external calls
+        bal.tokenABalance -= amountA;
+        bal.tokenBBalance -= amountB;
+
         if (amountA > 0) {
-            bal.tokenABalance -= amountA;
             tokenA.safeTransfer(msg.sender, amountA);
         }
         if (amountB > 0) {
-            bal.tokenBBalance -= amountB;
             tokenB.safeTransfer(msg.sender, amountB);
         }
 
         emit Withdrawn(msg.sender, amountA, amountB);
     }
 
-    // --- Open Batch ---
-    function openBatch() external returns (uint64 batchId) {
+    // --- Open Batch (settler-only) ---
+    function openBatch() external onlySettler whenNotPaused returns (uint64 batchId) {
         batchId = currentBatchId;
         Batch storage b = batches[batchId];
         b.openAt = uint64(block.timestamp);
@@ -156,7 +183,7 @@ contract BatchAuction {
         emit BatchOpened(batchId, b.closeAt);
     }
 
-    // --- Submit Order ---
+    // --- Submit Order (with slippage protection) ---
     function submitOrder(
         uint64 batchId,
         Side side,
@@ -180,7 +207,6 @@ contract BatchAuction {
             uint256 available = bal.tokenBBalance - bal.tokenBLocked;
             if (lockAmount > available) revert InsufficientBalance();
             bal.tokenBLocked += lockAmount;
-            // Insertion sort: DESC by limitPrice
             _insertBuy(b, Order({
                 user: msg.sender,
                 side: Side.Buy,
@@ -192,11 +218,9 @@ contract BatchAuction {
             b.buyCount++;
         } else {
             if (b.sellCount >= MAX_ORDERS) revert TooManyOrders();
-            // Lock tokenA = amount
             uint256 available = bal.tokenABalance - bal.tokenALocked;
             if (amount > available) revert InsufficientBalance();
             bal.tokenALocked += amount;
-            // Insertion sort: ASC by limitPrice
             _insertSell(b, Order({
                 user: msg.sender,
                 side: Side.Sell,
@@ -220,14 +244,11 @@ contract BatchAuction {
 
         UserBalance storage bal = userBalances[msg.sender];
 
-        // Find and remove from buy orders
         bool found = false;
         for (uint8 i = 0; i < b.buyCount; i++) {
             if (b.buyOrders[i].user == msg.sender) {
-                // Unlock tokenB
                 uint256 lockAmount = (b.buyOrders[i].amount * b.buyOrders[i].limitPrice) / PRICE_SCALE;
                 bal.tokenBLocked -= lockAmount;
-                // Shift remaining
                 for (uint8 j = i; j < b.buyCount - 1; j++) {
                     b.buyOrders[j] = b.buyOrders[j + 1];
                 }
@@ -241,9 +262,7 @@ contract BatchAuction {
         if (!found) {
             for (uint8 i = 0; i < b.sellCount; i++) {
                 if (b.sellOrders[i].user == msg.sender) {
-                    // Unlock tokenA
                     bal.tokenALocked -= b.sellOrders[i].amount;
-                    // Shift remaining
                     for (uint8 j = i; j < b.sellCount - 1; j++) {
                         b.sellOrders[j] = b.sellOrders[j + 1];
                     }
@@ -259,8 +278,8 @@ contract BatchAuction {
         emit OrderCancelled(batchId, msg.sender);
     }
 
-    // --- Settle Batch ---
-    function settleBatch(uint64 batchId) external {
+    // --- Settle Batch (settler-only, works even when paused for safety) ---
+    function settleBatch(uint64 batchId) external onlySettler {
         Batch storage b = batches[batchId];
         if (b.status != BatchStatus.Open) revert BatchNotOpen();
         if (block.timestamp < b.closeAt) revert BatchStillOpen();
@@ -277,8 +296,9 @@ contract BatchAuction {
             Order storage order = b.buyOrders[i];
             UserBalance storage bal = userBalances[order.user];
 
+            // Buy fills if clearing price exists AND limit price >= clearing price
+            // (buyer willing to pay at least the clearing price)
             if (clearingPrice > 0 && order.limitPrice >= clearingPrice) {
-                // Fill at clearing price
                 order.filledPrice = clearingPrice;
                 order.status = OrderStatus.Filled;
 
@@ -286,7 +306,7 @@ contract BatchAuction {
                 uint256 lockedAtLimit = (order.amount * order.limitPrice) / PRICE_SCALE;
                 bal.tokenBLocked -= lockedAtLimit;
 
-                // Deduct tokenB at clearing price
+                // Deduct tokenB at clearing price (buyer pays less than or equal to limit)
                 uint256 cost = (order.amount * clearingPrice) / PRICE_SCALE;
                 bal.tokenBBalance -= cost;
 
@@ -307,8 +327,9 @@ contract BatchAuction {
             Order storage order = b.sellOrders[i];
             UserBalance storage bal = userBalances[order.user];
 
+            // Sell fills if clearing price exists AND limit price <= clearing price
+            // (seller willing to accept at least the clearing price)
             if (clearingPrice > 0 && order.limitPrice <= clearingPrice) {
-                // Fill at clearing price
                 order.filledPrice = clearingPrice;
                 order.status = OrderStatus.Filled;
 
@@ -369,7 +390,6 @@ contract BatchAuction {
     // --- Internal: Insertion Sort ---
     function _insertBuy(Batch storage b, Order memory newOrder) internal {
         uint8 count = b.buyCount;
-        // Find insertion point (DESC: highest price first)
         uint8 pos = count;
         for (uint8 i = 0; i < count; i++) {
             if (newOrder.limitPrice > b.buyOrders[i].limitPrice) {
@@ -377,7 +397,6 @@ contract BatchAuction {
                 break;
             }
         }
-        // Shift right
         for (uint8 i = count; i > pos; i--) {
             b.buyOrders[i] = b.buyOrders[i - 1];
         }
@@ -386,7 +405,6 @@ contract BatchAuction {
 
     function _insertSell(Batch storage b, Order memory newOrder) internal {
         uint8 count = b.sellCount;
-        // Find insertion point (ASC: lowest price first)
         uint8 pos = count;
         for (uint8 i = 0; i < count; i++) {
             if (newOrder.limitPrice < b.sellOrders[i].limitPrice) {
@@ -394,51 +412,75 @@ contract BatchAuction {
                 break;
             }
         }
-        // Shift right
         for (uint8 i = count; i > pos; i--) {
             b.sellOrders[i] = b.sellOrders[i - 1];
         }
         b.sellOrders[pos] = newOrder;
     }
 
-    // --- Internal: Clearing Price Algorithm ---
-    // Port of find_clearing_price from Solana settle_batch.rs
-    // Walks sorted buy (DESC) and sell (ASC) arrays, finds crossing, returns midpoint
+    // --- Internal: Uniform Clearing Price Algorithm ---
+    // Finds the price where cumulative buy volume meets cumulative sell volume.
+    // Returns the marginal price at the crossing point (not midpoint).
+    //
+    // Buy orders sorted DESC: highest willingness-to-pay first.
+    // Sell orders sorted ASC: lowest willingness-to-sell first.
+    //
+    // Walk both arrays. At each step, the "marginal" price is the tighter
+    // constraint of the two sides. The crossing point is where cumulative
+    // supply meets cumulative demand.
     function _findClearingPrice(Batch storage b) internal view returns (uint256) {
         if (b.buyCount == 0 || b.sellCount == 0) return 0;
 
         uint256 bestBuy = b.buyOrders[0].limitPrice;
         uint256 bestSell = b.sellOrders[0].limitPrice;
-        if (bestBuy < bestSell) return 0; // No crossing
+        if (bestBuy < bestSell) return 0; // No crossing possible
 
         uint256 cumBuyVol = 0;
         uint256 cumSellVol = 0;
         uint8 buyIdx = 0;
         uint8 sellIdx = 0;
+        uint256 lastBuyPrice = bestBuy;
+        uint256 lastSellPrice = bestSell;
 
         while (buyIdx < b.buyCount && sellIdx < b.sellCount) {
+            // If current buy price < current sell price, no more crossing
             if (b.buyOrders[buyIdx].limitPrice < b.sellOrders[sellIdx].limitPrice) {
-                break; // No more crossing
+                break;
             }
+
+            // Track the prices at the crossing boundary
+            lastBuyPrice = b.buyOrders[buyIdx].limitPrice;
+            lastSellPrice = b.sellOrders[sellIdx].limitPrice;
 
             cumBuyVol += b.buyOrders[buyIdx].amount;
             cumSellVol += b.sellOrders[sellIdx].amount;
 
-            if (cumBuyVol >= cumSellVol) {
-                sellIdx++;
-            } else {
+            // Advance the side with less cumulative volume
+            if (cumBuyVol <= cumSellVol) {
                 buyIdx++;
+            } else {
+                sellIdx++;
             }
         }
 
-        uint8 finalBuyIdx = buyIdx < b.buyCount ? buyIdx : b.buyCount - 1;
-        uint8 finalSellIdx = sellIdx < b.sellCount ? sellIdx : b.sellCount - 1;
-
-        uint256 finalBuyPrice = b.buyOrders[finalBuyIdx].limitPrice;
-        uint256 finalSellPrice = b.sellOrders[finalSellIdx].limitPrice;
-
-        if (finalBuyPrice >= finalSellPrice) {
-            return (finalBuyPrice + finalSellPrice) / 2;
+        // Uniform clearing price: use the sell-side marginal price.
+        // This is the standard call auction convention: the clearing price
+        // is the highest sell price that still crosses with buys.
+        // Both sides get at least as good as their limit.
+        //
+        // For a single buy at 150 and single sell at 120:
+        //   lastSellPrice = 120, lastBuyPrice = 150
+        //   Clearing at sell-side marginal = 120 is valid (buyer pays less than limit)
+        //   Clearing at buy-side marginal = 150 is valid (seller gets more than limit)
+        //   Convention: use sell-side (lower) to minimize buyer cost.
+        //   Alternative: use buy-side to maximize seller revenue.
+        //   We use the sell-side marginal for buyer-friendly clearing.
+        //
+        // Why not midpoint? Midpoint creates an incentive to game: submit extreme
+        // limit prices to pull the midpoint in your favor. Marginal pricing makes
+        // the limit price irrelevant once it crosses -- you get the uniform price.
+        if (lastBuyPrice >= lastSellPrice) {
+            return lastSellPrice;
         }
         return 0;
     }

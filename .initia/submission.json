@@ -9,9 +9,9 @@
     "l1_chain_id": "initiation-2"
   },
   "contracts": {
-    "BatchAuction": "0x5dDAee13AAdFa374DBd62811412C280d78e1f9BB",
-    "ShieldSOL": "0x3cBb5A79CB5702b9AEc850D0C6c6F47F79200057",
-    "ShieldUSDC": "0x4A46e1e80e5e5718e9B2294d312AAc0fE4Bd2668"
+    "BatchAuction": "0xaE94586b2735bB61a08085Ec0b42b01ca6B60fd8",
+    "ShieldSOL": "0x17990Ea2Ba757fF731f41ae897C15D691A929d1F",
+    "ShieldUSDC": "0x5e10E636230a5f6acc3D6a59e6f550040a506069"
   },
   "initia_features": {
     "interwovenkit": true,
