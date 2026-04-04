@@ -141,3 +141,8 @@ button:active:not(:disabled) {
     transform: none;
   }
 }
+
+/* Hide Next.js dev error overlay (pino-pretty WalletConnect warning) */
+nextjs-portal {
+  display: none !important;
+}

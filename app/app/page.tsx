@@ -96,14 +96,14 @@ export default function Home() {
             {/* Ambient glow behind hero */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-shield-accent/[0.03] rounded-full blur-[100px] pointer-events-none" />
             <span className="relative text-xs tracking-widest uppercase text-shield-accent/70">
-              Initia Appchain
+              Built on Initia
             </span>
             <h1 className="relative text-5xl md:text-7xl font-bold tracking-tight leading-[1.1]">
-              One price. Every trader. The chain enforces it.
+              Everyone gets the same price
             </h1>
             <p className="relative text-shield-muted text-lg max-w-lg mx-auto">
-              Every 30 seconds, all orders clear at one uniform price.
-              The protocol keeps 0.1% of every trade. Your chain, your revenue.
+              BatchFi collects orders for 30 seconds, then clears them all
+              at one fair price. No one gets a better deal by being faster.
             </p>
             <div className="relative flex gap-3 justify-center pt-2">
               <button
@@ -122,13 +122,14 @@ export default function Home() {
                 <div>
                   <div className="text-shield-accent mb-4">
                     <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l3 9a5.002 5.002 0 01-6.001 0M18 7l-3 9m-6-4h6m-3-3v6" />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2">Sealed Order Book</h3>
+                  <h3 className="text-lg font-semibold mb-2">Batch Auction</h3>
                   <p className="text-sm text-shield-muted leading-relaxed max-w-sm">
-                    Orders are invisible to validators, searchers, and other traders
-                    until the batch settles. No one can see your intent.
+                    Orders collect for 30 seconds, then settle together.
+                    Your limit price decides if you fill, not what price you get.
+                    Everyone who fills pays the same.
                   </p>
                 </div>
                 <div className="flex gap-6 mt-6 pt-4 border-t border-shield-border text-xs text-shield-muted">

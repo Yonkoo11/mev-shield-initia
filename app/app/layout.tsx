@@ -20,9 +20,9 @@ const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL || "https://yonkoo11.github.io/mev-shield-initia";
 
 export const metadata: Metadata = {
-  title: "BatchFi | Fair Trading Protocol on Initia",
+  title: "BatchFi | Everyone Gets the Same Price",
   description:
-    "Batch auction DEX on its own Initia appchain. One uniform clearing price per batch. 0.1% protocol fee = chain revenue.",
+    "Batch auction DEX on its own Initia appchain. Orders collect for 30 seconds, then clear at one fair price.",
   icons: {
     icon: "/favicon.svg",
   },
