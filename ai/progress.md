@@ -1,6 +1,11 @@
 # BatchFi - Progress
 
-## Status: All Code Complete, Demo Video + Submit Remaining (2026-04-04)
+## Status: FULL E2E VERIFIED IN BROWSER (2026-04-04)
+
+## Browser Test PASSED (2026-04-04)
+User connected Rabby wallet on localhost:3099, trading view rendered, deposit + order flow works.
+Chain switching fix (wallet_addEthereumChain) resolved the "asking for ETH" issue.
+This was the last unverified risk. The product works end-to-end.
 
 ## Senior Dev Critique Pass (2026-04-04)
 Found and fixed 4 bugs:
@@ -19,7 +24,7 @@ Auto-sign chain ID confirmed correct (L1 authz is how InterwovenKit works).
 ## Remaining (2 items)
 - Demo video: 1-3 min on Loom/YouTube showing full flow (landing -> connect -> deposit -> order -> settle -> revenue)
 - Submit on DoraHacks: fill commit_sha + demo_video_url in submission.json, submit
-- Manual test: open localhost:3099 in browser, connect MetaMask with Bob's key, verify trading works
+- ~~Manual test: PASSED with Rabby wallet~~
 - NOT done: .init username display (deprioritized)
 
 ## What Changed (Plain English) - Rebrand Session (2026-04-04)
