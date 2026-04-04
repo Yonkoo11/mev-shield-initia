@@ -42,7 +42,29 @@ export const SHIELD_USDC_ADDRESS = (
 export const PRICE_SCALE = 1_000_000n;
 export const PRICE_DECIMALS = 6; // PRICE_SCALE = 1e6, prices use 6 decimal places
 export const TOKEN_DECIMALS = 18; // Both shSOL and shUSDC are 18-decimal ERC20s
-export const MAX_ORDERS = 20;
+export const MAX_ORDERS = 100;
+
+// ICosmos precompile (Initia-native: Cosmos queries from EVM)
+export const ICOSMOS_ADDRESS = "0x00000000000000000000000000000000000000f1" as `0x${string}`;
+export const ICOSMOS_ABI = [
+  {
+    type: "function",
+    name: "query_cosmos",
+    inputs: [
+      { name: "path", type: "string" },
+      { name: "req", type: "string" },
+    ],
+    outputs: [{ name: "", type: "string" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "to_cosmos_address",
+    inputs: [{ name: "addr", type: "address" }],
+    outputs: [{ name: "", type: "string" }],
+    stateMutability: "view",
+  },
+] as const;
 
 // Friendly display names (contract symbols are shSOL/shUSDC)
 export const TOKEN_A_DISPLAY = "INIT";
@@ -371,6 +393,20 @@ export const BATCH_AUCTION_ABI = [
       { name: "user", type: "address" },
     ],
     outputs: [{ name: "", type: "bool" }],
+  },
+  {
+    type: "function",
+    name: "protocolRevenue",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256" }],
+  },
+  {
+    type: "function",
+    name: "PROTOCOL_FEE_BPS",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ name: "", type: "uint256" }],
   },
 ] as const;
 

@@ -5,7 +5,8 @@ import { useAccount, useReadContract } from "wagmi";
 import { useInterwovenKit } from "@initia/interwovenkit-react";
 import { Header } from "../components/Header";
 import { ChainGuard } from "../components/ChainGuard";
-import { BATCH_AUCTION_ABI, BATCH_AUCTION_ADDRESS } from "../lib/contract";
+import { BATCH_AUCTION_ABI, BATCH_AUCTION_ADDRESS, ICOSMOS_ADDRESS, ICOSMOS_ABI, TOKEN_DECIMALS } from "../lib/contract";
+import { formatUnits } from "viem";
 import { DepositPanel } from "../components/DepositPanel";
 import { OrderForm } from "../components/OrderForm";
 import { BatchTimer } from "../components/BatchTimer";
@@ -33,6 +34,34 @@ export default function Home() {
     abi: BATCH_AUCTION_ABI,
     functionName: "MAX_ORDERS",
   });
+  const { data: protocolRevenue } = useReadContract({
+    address: BATCH_AUCTION_ADDRESS,
+    abi: BATCH_AUCTION_ABI,
+    functionName: "protocolRevenue",
+  });
+  const { data: oracleRaw } = useReadContract({
+    address: ICOSMOS_ADDRESS,
+    abi: ICOSMOS_ABI,
+    functionName: "query_cosmos",
+    args: ["/connect.oracle.v2.Query/GetPrices", '{"currency_pair_ids":["SOL/USD"]}'],
+  });
+
+  const revenueFormatted = protocolRevenue
+    ? parseFloat(formatUnits(protocolRevenue as bigint, TOKEN_DECIMALS)).toFixed(2)
+    : "0.00";
+
+  // Parse oracle SOL/USD price (8 decimals from Connect oracle)
+  let oraclePrice = "—";
+  if (oracleRaw) {
+    try {
+      const parsed = JSON.parse(oracleRaw as string);
+      const raw = parsed?.prices?.[0]?.price?.price;
+      const decimals = parseInt(parsed?.prices?.[0]?.decimals || "8");
+      if (raw && raw !== "0") {
+        oraclePrice = "$" + (parseInt(raw) / 10 ** decimals).toFixed(2);
+      }
+    } catch {}
+  }
 
   const [activeBatchId, setActiveBatchId] = useState<bigint | null>(null);
   const [batchStatus, setBatchStatus] = useState<string>("loading");
@@ -111,14 +140,24 @@ export default function Home() {
                   </span>
                   <span>
                     <span className="text-shield-accent font-mono font-bold text-base tabular-nums">
-                      {maxOrders ? String(maxOrders) : "20"}
+                      {maxOrders ? String(maxOrders) : "100"}
                     </span>{" "}
                     max orders
                   </span>
                   <span>
-                    <span className="text-shield-accent font-mono font-bold text-base tabular-nums">0.1%</span>{" "}
-                    protocol fee
+                    <span className="text-shield-accent font-mono font-bold text-base tabular-nums">
+                      ${revenueFormatted}
+                    </span>{" "}
+                    revenue earned
                   </span>
+                  {oraclePrice !== "—" && (
+                    <span>
+                      <span className="text-shield-cyan font-mono font-bold text-base tabular-nums">
+                        {oraclePrice}
+                      </span>{" "}
+                      SOL/USD oracle
+                    </span>
+                  )}
                 </div>
               </div>
 
