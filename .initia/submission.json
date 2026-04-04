@@ -9,7 +9,7 @@
   "native_feature": "auto-signing",
   "core_logic_path": "contracts/src/BatchAuction.sol",
   "native_feature_frontend_path": "app/components/AutoSignToggle.tsx",
-  "demo_video_url": "",
+  "demo_video_url": "https://youtu.be/uWWdXy0_TNM",
   "description": "Fair trading protocol on its own Initia appchain. Batch auctions enforce one uniform clearing price every 30 seconds. 0.1% protocol fee on every fill = chain revenue. Session signing for frictionless UX.",
   "track": "DeFi",
   "chain": {
