@@ -1,6 +1,15 @@
 {
-  "name": "MEV Shield",
-  "description": "Private batch auction DEX with MEV protection. Orders are sealed until batch settlement, preventing sandwich attacks and frontrunning. Built as its own Initia MiniEVM appchain where the sequencer enforces fair ordering by design.",
+  "project_name": "BatchFi",
+  "repo_url": "https://github.com/yonkoo11/mev-shield-initia",
+  "commit_sha": "",
+  "rollup_chain_id": "mevshield-1",
+  "deployed_address": "0xdDb2Abd925E5a96e283fAaecB303E2b63cfe5B46",
+  "vm": "evm",
+  "native_feature": "auto-signing",
+  "core_logic_path": "contracts/src/BatchAuction.sol",
+  "native_feature_frontend_path": "app/components/AutoSignToggle.tsx",
+  "demo_video_url": "",
+  "description": "Fair trading protocol on its own Initia appchain. Batch auctions enforce one uniform clearing price every 30 seconds. 0.1% protocol fee on every fill = chain revenue. Session signing for frictionless UX.",
   "track": "DeFi",
   "chain": {
     "type": "minievm",
@@ -9,9 +18,9 @@
     "l1_chain_id": "initiation-2"
   },
   "contracts": {
-    "BatchAuction": "0xaE94586b2735bB61a08085Ec0b42b01ca6B60fd8",
-    "ShieldSOL": "0x17990Ea2Ba757fF731f41ae897C15D691A929d1F",
-    "ShieldUSDC": "0x5e10E636230a5f6acc3D6a59e6f550040a506069"
+    "BatchAuction": "0xdDb2Abd925E5a96e283fAaecB303E2b63cfe5B46",
+    "ShieldSOL": "0x7A18b51f82af4e0ceFfA9161ce191290F0634F97",
+    "ShieldUSDC": "0x89c37E61a3836e56e8a88fe4f98Dc964B1Fde041"
   },
   "initia_features": {
     "interwovenkit": true,
@@ -20,10 +29,9 @@
   },
   "tech_stack": {
     "smart_contracts": "Solidity 0.8.24 (Foundry)",
-    "frontend": "Next.js 14, InterwovenKit, wagmi, viem, Tailwind CSS",
+    "frontend": "Next.js 15, InterwovenKit, wagmi, viem, Tailwind CSS",
     "settler": "TypeScript, ethers.js v6",
     "chain": "Initia MiniEVM (minitia)"
   },
-  "team_size": 1,
-  "repo": "https://github.com/yonkoo11/mev-shield-initia"
+  "team_size": 1
 }

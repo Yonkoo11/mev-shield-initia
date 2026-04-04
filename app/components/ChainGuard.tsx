@@ -33,9 +33,9 @@ export function ChainGuard({ children }: { children: React.ReactNode }) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h3 className="text-lg font-semibold">MEV Shield runs on its own chain</h3>
+          <h3 className="text-lg font-semibold">BatchFi runs on its own chain</h3>
           <p className="text-sm text-shield-muted leading-relaxed">
-            MEV Shield is a dedicated Initia MiniEVM rollup. The appchain is running locally
+            BatchFi is a dedicated Initia MiniEVM rollup. The appchain is running locally
             for this hackathon demo. To trade, run the rollup on your machine with the instructions in the README.
           </p>
           <div className="flex gap-3">

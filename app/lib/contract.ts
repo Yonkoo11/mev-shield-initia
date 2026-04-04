@@ -12,7 +12,7 @@ export const CHAIN_ID = Number(
 
 export const minitia = defineChain({
   id: CHAIN_ID,
-  name: "MEV Shield Minitia",
+  name: "BatchFi Minitia",
   nativeCurrency: { name: "GAS", symbol: "GAS", decimals: 18 },
   rpcUrls: {
     default: { http: [rpcUrl] },

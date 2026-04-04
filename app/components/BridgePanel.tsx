@@ -44,7 +44,7 @@ export function BridgePanel() {
             Interwoven Bridge
           </p>
           <p className="text-xs text-shield-muted">
-            Bridge INIT from Initia L1 to MEV Shield
+            Bridge INIT from Initia L1 to BatchFi
           </p>
         </div>
         <svg

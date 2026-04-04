@@ -80,7 +80,7 @@ export function Header({ activeTab = "trade", onTabChange }: HeaderProps) {
             </svg>
           </div>
           <span className="text-lg font-bold tracking-tight">
-            MEV<span className="text-shield-accent">Shield</span>
+            Batch<span className="text-shield-accent">Fi</span>
           </span>
         </div>
 

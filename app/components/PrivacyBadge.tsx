@@ -5,11 +5,11 @@ export function PrivacyBadge() {
         <div className="w-2.5 h-2.5 rounded-full bg-shield-accent shrink-0" />
         <div>
           <p className="text-sm font-medium text-shield-accent">
-            MEV Protected
+            Fair Pricing Active
           </p>
           <p className="text-xs text-shield-muted mt-0.5">
-            Orders sealed in batch auctions on Initia MiniEVM. Uniform clearing
-            price eliminates frontrunning.
+            All orders clear at one uniform price. The chain enforces fairness,
+            not a trusted third party.
           </p>
         </div>
       </div>

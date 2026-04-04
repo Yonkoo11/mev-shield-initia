@@ -70,11 +70,11 @@ export default function Home() {
               Initia Appchain
             </span>
             <h1 className="relative text-5xl md:text-7xl font-bold tracking-tight leading-[1.1]">
-              One price. Every order. Zero MEV.
+              One price. Every trader. The chain enforces it.
             </h1>
             <p className="relative text-shield-muted text-lg max-w-lg mx-auto">
-              Every 30 seconds, all orders in the batch clear at a single
-              uniform price. No front-running. No sandwich attacks.
+              Every 30 seconds, all orders clear at one uniform price.
+              The protocol keeps 0.1% of every trade. Your chain, your revenue.
             </p>
             <div className="relative flex gap-3 justify-center pt-2">
               <button
@@ -116,8 +116,8 @@ export default function Home() {
                     max orders
                   </span>
                   <span>
-                    <span className="text-shield-accent font-mono font-bold text-base tabular-nums">$0</span>{" "}
-                    MEV extracted
+                    <span className="text-shield-accent font-mono font-bold text-base tabular-nums">0.1%</span>{" "}
+                    protocol fee
                   </span>
                 </div>
               </div>
@@ -131,7 +131,7 @@ export default function Home() {
                   </div>
                   <h3 className="font-semibold text-sm mb-1">Uniform Clearing</h3>
                   <p className="text-xs text-shield-muted leading-relaxed">
-                    Every order fills at the same price. Frontrunning is impossible by design.
+                    Every order fills at the same price. Fair by design, not by trust.
                   </p>
                 </div>
                 <div className="flex-1 bg-shield-card border border-shield-border rounded-lg p-5">
