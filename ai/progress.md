@@ -1,6 +1,14 @@
 # BatchFi - Progress
 
-## Status: Phases 1-4 Complete (2026-04-04)
+## Status: All Code Complete, Demo Video + Submit Remaining (2026-04-04)
+
+## Senior Dev Critique Pass (2026-04-04)
+Found and fixed 4 bugs:
+1. BatchTimer showed /20 instead of /100 (hardcoded, didn't match MAX_ORDERS)
+2. OrderForm didn't include 0.1% fee in cost estimate (would cause contract revert)
+3. Order summary showed no fee disclosure (subtotal/fee/total breakdown added)
+4. Oracle reference price only on landing page (now passed to OrderForm too)
+Auto-sign chain ID confirmed correct (L1 authz is how InterwovenKit works).
 
 ## Completed Today
 - Phase 1: Fresh chain, E2E verified (deposit -> order -> settle -> correct fills)
@@ -8,11 +16,11 @@
 - Phase 3: Rebranded to BatchFi. Zero MEV references. Revenue-first pitch.
 - Phase 4: Oracle precompile verified (16 feeds). Live $21.60 revenue on landing page. 6 traders seeded.
 
-## Remaining
-- Phase 5: Demo video (1-3 min, Loom/YouTube) + README update
-- Phase 6: Final submission.json (commit_sha, demo_video_url) + submit on DoraHacks
-- NOT done: .init username display (useUsernameQuery hook -- deprioritized, auto-sign is enough for Initia-native feature)
-- NOT done: browser wallet test (can't automate, needs manual MetaMask test)
+## Remaining (2 items)
+- Demo video: 1-3 min on Loom/YouTube showing full flow (landing -> connect -> deposit -> order -> settle -> revenue)
+- Submit on DoraHacks: fill commit_sha + demo_video_url in submission.json, submit
+- Manual test: open localhost:3099 in browser, connect MetaMask with Bob's key, verify trading works
+- NOT done: .init username display (deprioritized)
 
 ## What Changed (Plain English) - Rebrand Session (2026-04-04)
 
