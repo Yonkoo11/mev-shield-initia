@@ -1,6 +1,17 @@
-# MEV Shield Initia → Rebrand - Progress
+# BatchFi - Progress
 
-## Status: E2E VERIFIED on Fresh Chain (2026-04-04)
+## Status: Rebranded, Contract v3 Deployed, E2E Verified (2026-04-04)
+
+## What Changed (Plain English) - Rebrand Session (2026-04-04)
+
+1. The app is now called **BatchFi** instead of MEV Shield. Every reference to MEV, sandwich attacks, and frontrunning is gone from the user-facing app.
+2. The new pitch: "One price. Every trader. The chain enforces it." Focus is on fair pricing and protocol revenue, not MEV prevention.
+3. The contract now takes a **0.1% fee** on every filled trade. Revenue accumulates on-chain and the owner can withdraw it. This directly answers the hackathon's "revenue-first" theme.
+4. The order book now supports **100 orders per batch** instead of 20.
+5. If the settler bot goes down, **anyone can settle** after a 5-minute grace period. Users' funds can't get stuck.
+6. **33 tests passing** including new tests for the fee system and the fallback settlement.
+7. All changes deployed to live chain and verified: 9 USDC of protocol revenue collected from a test trade.
+8. Live on GitHub Pages at yonkoo11.github.io/mev-shield-initia (landing page only, trading needs local chain).
 
 ## E2E Test Result (2026-04-04) - PASSED
 Full cycle verified via cast CLI:
