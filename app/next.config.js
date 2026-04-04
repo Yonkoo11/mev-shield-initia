@@ -2,8 +2,8 @@
 const isGhPages = process.env.GITHUB_ACTIONS === "true";
 const nextConfig = {
   output: "export",
-  basePath: isGhPages ? "/mev-shield-initia" : "",
-  assetPrefix: isGhPages ? "/mev-shield-initia/" : "",
+  basePath: isGhPages ? "/batchfi" : "",
+  assetPrefix: isGhPages ? "/batchfi/" : "",
   images: { unoptimized: true },
 };
 module.exports = nextConfig;

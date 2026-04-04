@@ -1,8 +1,8 @@
-# MEV Shield Initia - Product Direction
+# BatchFi - Product Direction
 
-## Date: 2026-04-01
+## Date: 2026-04-01 (originally MEV Shield, rebranded to BatchFi on 2026-04-04)
 
-## What MEV Shield IS
+## What BatchFi IS
 
 A fair trading chain on Initia. Batch auctions enforce uniform clearing prices at the sequencer level. Not a smart contract DEX on someone else's chain. An appchain where fair ordering is the protocol.
 

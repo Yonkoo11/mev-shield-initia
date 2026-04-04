@@ -17,7 +17,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://yonkoo11.github.io/mev-shield-initia";
+  process.env.NEXT_PUBLIC_SITE_URL || "https://yonkoo11.github.io/batchfi";
 
 export const metadata: Metadata = {
   title: "BatchFi | Everyone Gets the Same Price",

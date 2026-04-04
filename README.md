@@ -164,7 +164,7 @@ forge test -vv
 ## Project Structure
 
 ```
-mev-shield-initia/
+batchfi/
 ├── .initia/
 │   └── submission.json         # Hackathon submission metadata
 ├── contracts/                  # Foundry project (Solidity 0.8.24)

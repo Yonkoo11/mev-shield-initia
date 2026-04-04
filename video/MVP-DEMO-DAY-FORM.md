@@ -28,7 +28,7 @@ DeFi traders who want fair execution without worrying about bots. Initia builder
 (paste YouTube link after upload)
 
 **Link to code repository:**
-https://github.com/Yonkoo11/mev-shield-initia
+https://github.com/Yonkoo11/batchfi
 
 **Which Initia features have you implemented?**
 [x] Interwoven Kit
@@ -38,3 +38,4 @@ https://github.com/Yonkoo11/mev-shield-initia
 
 **Anything else you'd like us to know?**
 Solo builder. 530 lines of Solidity, 33 Foundry tests. The contract charges 0.1% on every fill and has accumulated $21 in protocol revenue from test trades. Anyone can settle a batch after 5 minutes if the settler bot goes down, so funds never get stuck. Oracle precompile integration reads price feeds from the Cosmos oracle module via ICosmos at 0xf1.
+   

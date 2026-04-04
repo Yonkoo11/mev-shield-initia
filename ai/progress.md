@@ -36,7 +36,7 @@ Auto-sign chain ID confirmed correct (L1 authz is how InterwovenKit works).
 5. If the settler bot goes down, **anyone can settle** after a 5-minute grace period. Users' funds can't get stuck.
 6. **33 tests passing** including new tests for the fee system and the fallback settlement.
 7. All changes deployed to live chain and verified: 9 USDC of protocol revenue collected from a test trade.
-8. Live on GitHub Pages at yonkoo11.github.io/mev-shield-initia (landing page only, trading needs local chain).
+8. Live on GitHub Pages at yonkoo11.github.io/batchfi (landing page only, trading needs local chain).
 
 ## E2E Test Result (2026-04-04) - PASSED
 Full cycle verified via cast CLI:
@@ -126,8 +126,8 @@ project_name, repo_url, commit_sha, rollup_chain_id, deployed_address, vm, nativ
 ## Infrastructure
 ```bash
 weave rollup start
-cd ~/Projects/mev-shield-initia/settler && bun run start
-cd ~/Projects/mev-shield-initia/app && npx next dev -p 3099
+cd ~/Projects/batchfi/settler && bun run start
+cd ~/Projects/batchfi/app && npx next dev -p 3099
 ```
 
 ## Contracts (v3, current deployment)

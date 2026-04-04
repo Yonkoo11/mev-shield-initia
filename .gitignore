@@ -5,9 +5,16 @@ node_modules/
 # Build outputs
 app/out/
 app/.next/
+app/tsconfig.tsbuildinfo
 contracts/out/
 contracts/cache/
+contracts/lib/
+contracts/broadcast/
 settler/dist/
+
+# Lock files
+bun.lock
+bun.lockb
 
 # Environment
 .env
@@ -22,10 +29,13 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Lockfiles (bun)
-bun.lockb
-contracts/lib/
-contracts/cache/
-contracts/broadcast/
+# Video build artifacts (keep final .mp4 and source scripts)
+video/segments/
+video/composites/
+video/frames/
+video/concat.txt
+video/music/
+
+# Internal tooling
 .claude/
 .ralph/
