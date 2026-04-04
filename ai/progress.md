@@ -37,11 +37,10 @@ Full cycle verified via cast CLI:
 
 NOT tested yet: browser wallet connect flow (requires MetaMask extension, can't do in headless puppeteer)
 
-## Deployer Key (fresh chain)
-Mnemonic: "change entire visual decide amazing weasel fabric engage remove first cement kitten dragon patient spare capital bunker demise sauce broccoli town present member tragic"
+## Deployer (fresh chain)
 EVM address: 0x1d6463ef2dE6813CdC6249145Cd179120Eaf78E9
-EVM PK: 0x3396b705d3c3ccd38d530ec40b42adc57e996a876b26c9e575220b25d6d8cf6a
 Cosmos: init1r4jx8medu6qnehrzfy29e5tezg82778fu48u5t
+(Keys stored locally in ~/.minitia/artifacts/config.json)
 
 ## Decision: Rebrand + Ship (April 15 deadline, 11PM UTC)
 
@@ -102,14 +101,14 @@ project_name, repo_url, commit_sha, rollup_chain_id, deployed_address, vm, nativ
 - [ ] Clean repo (no secrets, no .claude/)
 - [ ] Submit on DoraHacks
 
-## Critique Fixes Required (from senior dev review)
-1. Protocol fee -- contract has zero revenue model. Add 0.1% on fills.
-2. ConnectOracle -- show reference price. Proves Initia integration depth.
-3. MAX_ORDERS 20→100 -- current cap is a toy.
-4. .init usernames in order book -- Initia-native UX.
-5. Settler fallback -- add timeout so anyone can settle expired batches.
-6. Seed demo data -- empty DEX looks dead.
-7. Rebrand -- drop all "MEV" references. Revenue-first pitch.
+## Critique Fixes (from senior dev review)
+1. [x] Protocol fee -- 0.1% on fills, $21.60 revenue accumulated
+2. [x] ConnectOracle -- query working, displayed when price > 0
+3. [x] MAX_ORDERS 20→100
+4. [ ] .init usernames in order book (deprioritized, auto-sign satisfies requirement)
+5. [x] Settler fallback -- anyone settles after 5 min grace period
+6. [x] Seed demo data -- 6 traders, orders at multiple price levels
+7. [x] Rebrand -- BatchFi, zero MEV references, revenue-first pitch
 
 ## Infrastructure
 ```bash
@@ -118,14 +117,12 @@ cd ~/Projects/mev-shield-initia/settler && bun run start
 cd ~/Projects/mev-shield-initia/app && npx next dev -p 3099
 ```
 
-## Contracts (fresh chain deployment)
-- BatchAuction: 0x5B4Dc6d5589Af9067A7FC18E5b71120a5dad127F
-- shSOL: 0x0d680E0232D22e45E508Fc0A820Defe245A985b4
-- shUSDC: 0x4eEad40e95f1c5Be6BF0aAE63c87fFb0D295b16E
+## Contracts (v3, current deployment)
+- BatchAuction: 0xdDb2Abd925E5a96e283fAaecB303E2b63cfe5B46
+- shSOL: 0x7A18b51f82af4e0ceFfA9161ce191290F0634F97
+- shUSDC: 0x89c37E61a3836e56e8a88fe4f98Dc964B1Fde041
 
 ## Test Accounts
 - Deployer: 0x1d6463ef2dE6813CdC6249145Cd179120Eaf78E9 (also settler)
-  PK: 0x3396b705d3c3ccd38d530ec40b42adc57e996a876b26c9e575220b25d6d8cf6a
-- Bob: 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
-  PK: 0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d
-  Has: 4900 shSOL + 499100 shUSDC wallet, 110 shSOL + 9100 shUSDC contract
+- Bob (hardhat #1): 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
+- 4 additional traders (hardhat #2-5) funded and deposited for demo depth
