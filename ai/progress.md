@@ -1,6 +1,18 @@
 # BatchFi - Progress
 
-## Status: Rebranded, Contract v3 Deployed, E2E Verified (2026-04-04)
+## Status: Phases 1-4 Complete (2026-04-04)
+
+## Completed Today
+- Phase 1: Fresh chain, E2E verified (deposit -> order -> settle -> correct fills)
+- Phase 2: Contract v3 (0.1% fee, MAX_ORDERS 100, settler fallback). 33/33 tests.
+- Phase 3: Rebranded to BatchFi. Zero MEV references. Revenue-first pitch.
+- Phase 4: Oracle precompile verified (16 feeds). Live $21.60 revenue on landing page. 6 traders seeded.
+
+## Remaining
+- Phase 5: Demo video (1-3 min, Loom/YouTube) + README update
+- Phase 6: Final submission.json (commit_sha, demo_video_url) + submit on DoraHacks
+- NOT done: .init username display (useUsernameQuery hook -- deprioritized, auto-sign is enough for Initia-native feature)
+- NOT done: browser wallet test (can't automate, needs manual MetaMask test)
 
 ## What Changed (Plain English) - Rebrand Session (2026-04-04)
 
