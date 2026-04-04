@@ -1,6 +1,19 @@
 # MEV Shield Initia → Rebrand - Progress
 
-## Status: Planning Rebrand + Final Push (2026-04-04)
+## Status: Fresh Chain Running, Need Account Registration Before Deploy (2026-04-04)
+
+## BLOCKER: MiniEVM Account Registration
+Fresh rollup running at block 2+. Genesis GAS increased to 10^24 (1M ETH).
+Gas station (deployer) = init1nt32pr9fr4k8jprczqcyqgk7yes9kptnppjd40 = 0x9aE2a08cA91d6C79047810304022de26605B0573.
+Has 10^24 GAS on Cosmos side but EVM address is unregistered.
+CANNOT send EVM tx until Cosmos account exists.
+Fix: Use Cosmos REST API or minitiad CLI to do a bank send from gas station, which registers the account.
+The mnemonic is in ~/.minitia/artifacts/config.json under system_keys.admin.
+Alternative: The hackathon docs say `weave init` handles this. May need to re-run `weave init` or use the REST API at localhost:1317.
+
+## Admin/Gas Station Mnemonic
+"change entire visual decide amazing weasel fabric engage remove first cement kitten dragon patient spare capital bunker demise sauce broccoli town present member tragic"
+Cosmos addr: init1nt32pr9fr4k8jprczqcyqgk7yes9kptnppjd40 (=deployer 0x9aE2...)
 
 ## Decision: Rebrand + Ship (April 15 deadline, 11PM UTC)
 
