@@ -1,7 +1,7 @@
 {
   "project_name": "BatchFi",
   "repo_url": "https://github.com/yonkoo11/mev-shield-initia",
-  "commit_sha": "",
+  "commit_sha": "164e7ca674f92229ddcace3618427d4730032508",
   "rollup_chain_id": "mevshield-1",
   "deployed_address": "0xdDb2Abd925E5a96e283fAaecB303E2b63cfe5B46",
   "deployment_tx": "0x7028a7a51f7356f3e51d436088c3ae18d61a524bc1b7c9d33eb8473e1ac917c8",
