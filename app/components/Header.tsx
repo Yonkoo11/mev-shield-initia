@@ -5,7 +5,7 @@ import { useAccount, useDisconnect } from "wagmi";
 import { useInterwovenKit } from "@initia/interwovenkit-react";
 import { INITIA_CHAIN_ID } from "../lib/contract";
 
-type NavTab = "trade" | "bridge" | "history" | "docs";
+type NavTab = "trade" | "bridge" | "docs";
 
 interface HeaderProps {
   activeTab?: NavTab;
@@ -15,7 +15,7 @@ interface HeaderProps {
 export function Header({ activeTab = "trade", onTabChange }: HeaderProps) {
   const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
-  const { username, openConnect, openWallet, openBridge, autoSign } =
+  const { username, openConnect, openBridge, autoSign } =
     useInterwovenKit();
   const [copied, setCopied] = useState(false);
 
@@ -37,18 +37,20 @@ export function Header({ activeTab = "trade", onTabChange }: HeaderProps) {
   const navItems: { id: NavTab; label: string }[] = [
     { id: "trade", label: "Trade" },
     { id: "bridge", label: "Bridge" },
-    { id: "history", label: "History" },
     { id: "docs", label: "Docs" },
   ];
 
   const handleTabClick = (tab: NavTab) => {
     if (tab === "bridge") {
-      openBridge({
-        srcChainId: "initiation-2",
-        srcDenom: "uinit",
-        dstChainId: "mevshield-1",
-        dstDenom: "uinit",
-      });
+      try {
+        openBridge({
+          srcChainId: "initiation-2",
+          srcDenom: "uinit",
+        });
+      } catch {
+        // Chain not registered in Initia registry -- open bridge site directly
+        window.open("https://bridge.testnet.initia.xyz", "_blank");
+      }
       return;
     }
     if (tab === "docs") {
@@ -121,25 +123,6 @@ export function Header({ activeTab = "trade", onTabChange }: HeaderProps) {
                 <span className="font-mono text-xs">
                   {copied ? "Copied!" : displayName}
                 </span>
-              </button>
-              <button
-                onClick={openWallet}
-                className="bg-shield-card border border-shield-border rounded-lg px-2 py-1.5 text-shield-muted hover:text-shield-accent hover:border-shield-accent/30 transition-colors duration-150 ease-out"
-                title="Wallet"
-              >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
-                  />
-                </svg>
               </button>
               <button
                 onClick={() => disconnect()}

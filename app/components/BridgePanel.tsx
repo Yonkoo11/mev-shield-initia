@@ -10,12 +10,14 @@ export function BridgePanel() {
   if (!isConnected) return null;
 
   const handleBridge = () => {
-    openBridge({
-      srcChainId: "initiation-2",
-      srcDenom: "uinit",
-      dstChainId: "mevshield-1",
-      dstDenom: "uinit",
-    });
+    try {
+      openBridge({
+        srcChainId: "initiation-2",
+        srcDenom: "uinit",
+      });
+    } catch {
+      window.open("https://bridge.testnet.initia.xyz", "_blank");
+    }
   };
 
   return (

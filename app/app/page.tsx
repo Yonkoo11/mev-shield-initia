@@ -17,7 +17,7 @@ import { OrderDepth } from "../components/OrderDepth";
 import { BatchLifecycle } from "../components/BatchLifecycle";
 import { useBatch, useBatchOrders } from "../hooks/useBatchAuction";
 
-type NavTab = "trade" | "bridge" | "history" | "docs";
+type NavTab = "trade" | "bridge" | "docs";
 
 export default function Home() {
   const { isConnected, address } = useAccount();
@@ -233,12 +233,6 @@ export default function Home() {
             </div>
           )}
 
-          {activeTab === "history" && (
-            <div className="mt-8 text-center text-shield-muted">
-              <p className="text-lg">Trade history coming soon</p>
-              <p className="text-sm mt-2">Past batch results and your order history will appear here.</p>
-            </div>
-          )}
         </ChainGuard>
       )}
     </main>
