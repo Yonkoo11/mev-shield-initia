@@ -16,7 +16,7 @@ Scoring: Technical Execution 30%, Working Demo 20%, Product UX 20%, Originality 
 ## Clip 02 — connect-trade
 **Frame:** Connected trading view — three-column layout with batch timer, order form, order depth
 **Voice:**
-"Connect a wallet through InterwovenKit. The trading view shows the current batch countdown, your balances, and the order depth on both sides. Place a limit order and it goes into the batch."
+"Connect with InterwovenKit. You can see cipher dot init in the header. The batch timer counts down from thirty seconds. Set your limit price, your amount, and submit. Your order goes into the batch."
 
 ---
 

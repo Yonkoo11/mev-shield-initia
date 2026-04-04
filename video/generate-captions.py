@@ -5,7 +5,7 @@ import os, textwrap
 
 CLIPS = {
     "01-open-product": "This is BatchFi. A batch auction DEX running on its own Initia appchain. Every thirty seconds, it collects orders and clears them at one uniform price. Twenty-one dollars in protocol revenue so far from test trades.",
-    "02-connect-trade": "Connect a wallet through InterwovenKit. The trading view shows the current batch countdown, your balances, and the order depth on both sides. Place a limit order and it goes into the batch.",
+    "02-connect-trade": "Connect with InterwovenKit. You can see cipher dot init in the header. The batch timer counts down from thirty seconds. Set your limit price, your amount, and submit. Your order goes into the batch.",
     "03-settlement": "When the timer hits zero, the settler calls the contract. The clearing algorithm walks sorted buys and sells, finds where supply meets demand, and sets one price. Everyone who fills gets that price. No one gets priority.",
     "04-contract": "The contract is five hundred lines of Solidity with thirty-three tests. It charges zero point one percent on every fill. There is a settler fallback so anyone can settle after five minutes if the bot goes down. Funds never get stuck.",
     "05-initia-features": "Built with InterwovenKit for wallet connection, session signing so you can trade without popups, and the Interwoven Bridge for moving tokens from Initia L1. The oracle precompile at address F1 feeds reference prices from the Cosmos oracle module.",
