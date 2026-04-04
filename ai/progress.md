@@ -1,19 +1,24 @@
 # MEV Shield Initia → Rebrand - Progress
 
-## Status: Fresh Chain Running, Need Account Registration Before Deploy (2026-04-04)
+## Status: E2E VERIFIED on Fresh Chain (2026-04-04)
 
-## BLOCKER: MiniEVM Account Registration
-Fresh rollup running at block 2+. Genesis GAS increased to 10^24 (1M ETH).
-Gas station (deployer) = init1nt32pr9fr4k8jprczqcyqgk7yes9kptnppjd40 = 0x9aE2a08cA91d6C79047810304022de26605B0573.
-Has 10^24 GAS on Cosmos side but EVM address is unregistered.
-CANNOT send EVM tx until Cosmos account exists.
-Fix: Use Cosmos REST API or minitiad CLI to do a bank send from gas station, which registers the account.
-The mnemonic is in ~/.minitia/artifacts/config.json under system_keys.admin.
-Alternative: The hackathon docs say `weave init` handles this. May need to re-run `weave init` or use the REST API at localhost:1317.
+## E2E Test Result (2026-04-04) - PASSED
+Full cycle verified via cast CLI:
+1. Deployer + Bob funded with GAS + tokens
+2. Approvals + deposits succeeded
+3. Batch opened, buy order (100 USDC/SOL) + sell order (90 USDC/SOL) placed
+4. Settlement at clearing price 90 (sell-side marginal) -- CORRECT
+5. Bob: +10 shSOL, -900 shUSDC. Deployer: -10 shSOL, +900 shUSDC -- CORRECT
+6. Frontend compiles and serves on :3099 (27s first load due to InterwovenKit)
+7. Settler cycling batches on new contracts
 
-## Admin/Gas Station Mnemonic
-"change entire visual decide amazing weasel fabric engage remove first cement kitten dragon patient spare capital bunker demise sauce broccoli town present member tragic"
-Cosmos addr: init1nt32pr9fr4k8jprczqcyqgk7yes9kptnppjd40 (=deployer 0x9aE2...)
+NOT tested yet: browser wallet connect flow (requires MetaMask extension, can't do in headless puppeteer)
+
+## Deployer Key (fresh chain)
+Mnemonic: "change entire visual decide amazing weasel fabric engage remove first cement kitten dragon patient spare capital bunker demise sauce broccoli town present member tragic"
+EVM address: 0x1d6463ef2dE6813CdC6249145Cd179120Eaf78E9
+EVM PK: 0x3396b705d3c3ccd38d530ec40b42adc57e996a876b26c9e575220b25d6d8cf6a
+Cosmos: init1r4jx8medu6qnehrzfy29e5tezg82778fu48u5t
 
 ## Decision: Rebrand + Ship (April 15 deadline, 11PM UTC)
 
@@ -90,12 +95,14 @@ cd ~/Projects/mev-shield-initia/settler && bun run start
 cd ~/Projects/mev-shield-initia/app && npx next dev -p 3099
 ```
 
-## Contracts (will change after redeploy)
-- BatchAuction: 0xaE94586b2735bB61a08085Ec0b42b01ca6B60fd8
-- shSOL: 0x17990Ea2Ba757fF731f41ae897C15D691A929d1F
-- shUSDC: 0x5e10E636230a5f6acc3D6a59e6f550040a506069
+## Contracts (fresh chain deployment)
+- BatchAuction: 0x5B4Dc6d5589Af9067A7FC18E5b71120a5dad127F
+- shSOL: 0x0d680E0232D22e45E508Fc0A820Defe245A985b4
+- shUSDC: 0x4eEad40e95f1c5Be6BF0aAE63c87fFb0D295b16E
 
 ## Test Accounts
-- Deployer: 0x9aE2a08cA91d6C79047810304022de26605B0573
+- Deployer: 0x1d6463ef2dE6813CdC6249145Cd179120Eaf78E9 (also settler)
+  PK: 0x3396b705d3c3ccd38d530ec40b42adc57e996a876b26c9e575220b25d6d8cf6a
 - Bob: 0x70997970C51812dc3A010C7d01b50e0d17dc79C8
   PK: 0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d
+  Has: 4900 shSOL + 499100 shUSDC wallet, 110 shSOL + 9100 shUSDC contract
