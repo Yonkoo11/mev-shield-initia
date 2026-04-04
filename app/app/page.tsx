@@ -205,6 +205,7 @@ export default function Home() {
                   <BalanceDisplay />
                   <OrderForm
                     batchId={batchStatus === "open" ? activeBatchId : null}
+                    oraclePrice={oraclePrice !== "—" ? oraclePrice : undefined}
                   />
                   <AutoSignToggle />
                 </div>

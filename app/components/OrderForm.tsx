@@ -11,9 +11,10 @@ import { useToast } from "./Toast";
 interface OrderFormProps {
   batchId: bigint | null;
   onOrderSubmitted?: () => void;
+  oraclePrice?: string;
 }
 
-export function OrderForm({ batchId, onOrderSubmitted }: OrderFormProps) {
+export function OrderForm({ batchId, onOrderSubmitted, oraclePrice }: OrderFormProps) {
   const { isConnected, address } = useAccount();
   const toast = useToast();
   const [side, setSide] = useState<"buy" | "sell">("buy");
@@ -76,10 +77,17 @@ export function OrderForm({ batchId, onOrderSubmitted }: OrderFormProps) {
       : balance.tokenABalance - balance.tokenALocked // need INIT to sell
     : 0n;
 
+  // Include 0.1% protocol fee in buy-side cost estimate
+  const FEE_BPS = 10;
+  const BPS_DENOM = 10000;
   const orderCost = price && amount
     ? side === "buy"
-      ? parseUnits((parsedPrice * parsedAmount).toFixed(TOKEN_DECIMALS), TOKEN_DECIMALS) // USDC needed
-      : parseUnits(amount, TOKEN_DECIMALS) // INIT needed
+      ? (() => {
+          const base = parseUnits((parsedPrice * parsedAmount).toFixed(TOKEN_DECIMALS), TOKEN_DECIMALS);
+          const fee = (base * BigInt(FEE_BPS)) / BigInt(BPS_DENOM);
+          return base + fee;
+        })()
+      : parseUnits(amount, TOKEN_DECIMALS)
     : 0n;
 
   const insufficientBalance = orderCost > 0n && orderCost > availableBalance;
@@ -149,9 +157,16 @@ export function OrderForm({ batchId, onOrderSubmitted }: OrderFormProps) {
 
           <div className="space-y-3">
             <div>
-              <label className="text-sm text-shield-muted">
-                Limit Price (USDC per INIT)
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="text-sm text-shield-muted">
+                  Limit Price (USDC per INIT)
+                </label>
+                {oraclePrice && (
+                  <span className="text-xs text-shield-cyan">
+                    Oracle: {oraclePrice}
+                  </span>
+                )}
+              </div>
               <input
                 type="number"
                 value={price}
@@ -184,13 +199,29 @@ export function OrderForm({ batchId, onOrderSubmitted }: OrderFormProps) {
             {price && amount && parsedPrice > 0 && parsedAmount > 0 && (
               <div className="bg-shield-bg rounded-lg p-3 text-xs text-shield-muted space-y-1">
                 <div className="flex justify-between">
-                  <span>Total {side === "buy" ? "cost" : "proceeds"}</span>
+                  <span>{side === "buy" ? "Subtotal" : "Gross proceeds"}</span>
                   <span className="font-mono text-shield-text">
                     {(parsedPrice * parsedAmount).toFixed(2)} USDC
                   </span>
                 </div>
+                <div className="flex justify-between">
+                  <span>Protocol fee (0.1%)</span>
+                  <span className="font-mono text-shield-text">
+                    {(parsedPrice * parsedAmount * 0.001).toFixed(2)} USDC
+                  </span>
+                </div>
+                <div className="flex justify-between border-t border-shield-border pt-1 mt-1">
+                  <span className="font-medium text-shield-text">
+                    {side === "buy" ? "Total cost" : "Net proceeds"}
+                  </span>
+                  <span className="font-mono font-medium text-shield-text">
+                    {side === "buy"
+                      ? (parsedPrice * parsedAmount * 1.001).toFixed(2)
+                      : (parsedPrice * parsedAmount * 0.999).toFixed(2)} USDC
+                  </span>
+                </div>
                 {insufficientBalance && (
-                  <p className="text-shield-red">Insufficient deposited balance</p>
+                  <p className="text-shield-red mt-1">Insufficient deposited balance</p>
                 )}
               </div>
             )}

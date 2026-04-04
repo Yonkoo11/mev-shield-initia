@@ -119,7 +119,7 @@ export function BatchTimer({ onBatchUpdate }: BatchTimerProps) {
             : "No Active Batch"}
         </span>
         <span className="text-xs text-shield-muted">
-          {orderCount}/20
+          {orderCount}/100
         </span>
       </div>
 
