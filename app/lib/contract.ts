@@ -25,17 +25,17 @@ export const minitia = defineChain({
 // -- Deployed Contract Addresses (env-driven with deployed defaults) --
 export const BATCH_AUCTION_ADDRESS = (
   process.env.NEXT_PUBLIC_AUCTION_ADDRESS ||
-  "0x5B4Dc6d5589Af9067A7FC18E5b71120a5dad127F"
+  "0xdDb2Abd925E5a96e283fAaecB303E2b63cfe5B46"
 ) as `0x${string}`;
 
 export const SHIELD_SOL_ADDRESS = (
   process.env.NEXT_PUBLIC_TOKEN_A_ADDRESS ||
-  "0x0d680E0232D22e45E508Fc0A820Defe245A985b4"
+  "0x7A18b51f82af4e0ceFfA9161ce191290F0634F97"
 ) as `0x${string}`;
 
 export const SHIELD_USDC_ADDRESS = (
   process.env.NEXT_PUBLIC_TOKEN_B_ADDRESS ||
-  "0x4eEad40e95f1c5Be6BF0aAE63c87fFb0D295b16E"
+  "0x89c37E61a3836e56e8a88fe4f98Dc964B1Fde041"
 ) as `0x${string}`;
 
 // -- Constants matching the Solidity contract --

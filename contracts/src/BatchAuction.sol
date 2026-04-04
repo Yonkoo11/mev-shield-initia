@@ -10,7 +10,10 @@ contract BatchAuction is ReentrancyGuard {
 
     // --- Constants ---
     uint256 public constant PRICE_SCALE = 1e6;
-    uint8 public constant MAX_ORDERS = 20;
+    uint8 public constant MAX_ORDERS = 100;
+    uint256 public constant PROTOCOL_FEE_BPS = 10; // 0.1% = 10 basis points
+    uint256 public constant BPS_DENOMINATOR = 10000;
+    uint32 public constant SETTLE_GRACE_PERIOD = 300; // 5 min after close, anyone can settle
 
     // --- Enums ---
     enum Side { Buy, Sell }
@@ -34,8 +37,8 @@ contract BatchAuction is ReentrancyGuard {
         uint8 buyCount;
         uint8 sellCount;
         BatchStatus status;
-        Order[20] buyOrders;   // sorted DESC by limitPrice
-        Order[20] sellOrders;  // sorted ASC by limitPrice
+        Order[100] buyOrders;   // sorted DESC by limitPrice
+        Order[100] sellOrders;  // sorted ASC by limitPrice
     }
 
     struct UserBalance {
@@ -56,6 +59,9 @@ contract BatchAuction is ReentrancyGuard {
     // Settler role: only this address can open and settle batches
     address public settler;
 
+    // Protocol revenue from fees (denominated in tokenB)
+    uint256 public protocolRevenue;
+
     mapping(uint64 => Batch) public batches;
     mapping(address => UserBalance) public userBalances;
     mapping(uint64 => mapping(address => bool)) public hasOrder;
@@ -70,6 +76,8 @@ contract BatchAuction is ReentrancyGuard {
     event BatchSettled(uint64 indexed batchId, uint256 clearingPrice, uint8 filled, uint8 unfilled);
     event SettlerUpdated(address indexed oldSettler, address indexed newSettler);
     event PauseToggled(bool paused);
+    event ProtocolFeeCollected(uint64 indexed batchId, uint256 feeAmount);
+    event RevenueWithdrawn(address indexed to, uint256 amount);
 
     // --- Errors ---
     error NotOwner();
@@ -127,6 +135,14 @@ contract BatchAuction is ReentrancyGuard {
     function togglePause() external onlyOwner {
         paused = !paused;
         emit PauseToggled(paused);
+    }
+
+    function withdrawRevenue(address to) external onlyOwner {
+        uint256 amount = protocolRevenue;
+        if (amount == 0) revert InvalidAmount();
+        protocolRevenue = 0;
+        tokenB.safeTransfer(to, amount);
+        emit RevenueWithdrawn(to, amount);
     }
 
     // --- Deposit ---
@@ -202,8 +218,10 @@ contract BatchAuction is ReentrancyGuard {
 
         if (side == Side.Buy) {
             if (b.buyCount >= MAX_ORDERS) revert TooManyOrders();
-            // Lock tokenB = amount * limitPrice / PRICE_SCALE
-            uint256 lockAmount = (amount * limitPrice) / PRICE_SCALE;
+            // Lock tokenB = amount * limitPrice / PRICE_SCALE + max fee
+            uint256 cost = (amount * limitPrice) / PRICE_SCALE;
+            uint256 maxFee = (cost * PROTOCOL_FEE_BPS) / BPS_DENOMINATOR;
+            uint256 lockAmount = cost + maxFee;
             uint256 available = bal.tokenBBalance - bal.tokenBLocked;
             if (lockAmount > available) revert InsufficientBalance();
             bal.tokenBLocked += lockAmount;
@@ -247,8 +265,9 @@ contract BatchAuction is ReentrancyGuard {
         bool found = false;
         for (uint8 i = 0; i < b.buyCount; i++) {
             if (b.buyOrders[i].user == msg.sender) {
-                uint256 lockAmount = (b.buyOrders[i].amount * b.buyOrders[i].limitPrice) / PRICE_SCALE;
-                bal.tokenBLocked -= lockAmount;
+                uint256 cost = (b.buyOrders[i].amount * b.buyOrders[i].limitPrice) / PRICE_SCALE;
+                uint256 maxFee = (cost * PROTOCOL_FEE_BPS) / BPS_DENOMINATOR;
+                bal.tokenBLocked -= (cost + maxFee);
                 for (uint8 j = i; j < b.buyCount - 1; j++) {
                     b.buyOrders[j] = b.buyOrders[j + 1];
                 }
@@ -278,45 +297,49 @@ contract BatchAuction is ReentrancyGuard {
         emit OrderCancelled(batchId, msg.sender);
     }
 
-    // --- Settle Batch (settler-only, works even when paused for safety) ---
-    function settleBatch(uint64 batchId) external onlySettler {
+    // --- Settle Batch ---
+    // Settler-only during normal operation. After SETTLE_GRACE_PERIOD,
+    // anyone can settle to prevent funds from being locked if settler is down.
+    function settleBatch(uint64 batchId) external {
         Batch storage b = batches[batchId];
         if (b.status != BatchStatus.Open) revert BatchNotOpen();
         if (block.timestamp < b.closeAt) revert BatchStillOpen();
         if (b.buyCount == 0 && b.sellCount == 0) revert NoOrders();
+
+        // Settler-only during grace period; anyone after
+        if (block.timestamp < b.closeAt + SETTLE_GRACE_PERIOD) {
+            if (msg.sender != settler && msg.sender != owner) revert NotSettler();
+        }
 
         uint256 clearingPrice = _findClearingPrice(b);
         b.clearingPrice = clearingPrice;
 
         uint8 filled = 0;
         uint8 unfilled = 0;
+        uint256 totalFees = 0;
 
         // Process buy orders
         for (uint8 i = 0; i < b.buyCount; i++) {
             Order storage order = b.buyOrders[i];
             UserBalance storage bal = userBalances[order.user];
 
-            // Buy fills if clearing price exists AND limit price >= clearing price
-            // (buyer willing to pay at least the clearing price)
+            // Unlock = cost at limit + max fee (matches lock in submitOrder)
+            uint256 costAtLimit = (order.amount * order.limitPrice) / PRICE_SCALE;
+            uint256 maxFee = (costAtLimit * PROTOCOL_FEE_BPS) / BPS_DENOMINATOR;
+            bal.tokenBLocked -= (costAtLimit + maxFee);
+
             if (clearingPrice > 0 && order.limitPrice >= clearingPrice) {
                 order.filledPrice = clearingPrice;
                 order.status = OrderStatus.Filled;
 
-                // Unlock tokenB locked at limit price
-                uint256 lockedAtLimit = (order.amount * order.limitPrice) / PRICE_SCALE;
-                bal.tokenBLocked -= lockedAtLimit;
-
-                // Deduct tokenB at clearing price (buyer pays less than or equal to limit)
                 uint256 cost = (order.amount * clearingPrice) / PRICE_SCALE;
-                bal.tokenBBalance -= cost;
+                uint256 fee = (cost * PROTOCOL_FEE_BPS) / BPS_DENOMINATOR;
+                bal.tokenBBalance -= (cost + fee);
+                totalFees += fee;
 
-                // Credit tokenA
                 bal.tokenABalance += order.amount;
                 filled++;
             } else {
-                // Unfilled: unlock tokenB
-                uint256 lockedAtLimit = (order.amount * order.limitPrice) / PRICE_SCALE;
-                bal.tokenBLocked -= lockedAtLimit;
                 order.status = OrderStatus.Unfilled;
                 unfilled++;
             }
@@ -327,26 +350,28 @@ contract BatchAuction is ReentrancyGuard {
             Order storage order = b.sellOrders[i];
             UserBalance storage bal = userBalances[order.user];
 
-            // Sell fills if clearing price exists AND limit price <= clearing price
-            // (seller willing to accept at least the clearing price)
             if (clearingPrice > 0 && order.limitPrice <= clearingPrice) {
                 order.filledPrice = clearingPrice;
                 order.status = OrderStatus.Filled;
 
-                // Unlock and deduct tokenA
                 bal.tokenALocked -= order.amount;
                 bal.tokenABalance -= order.amount;
 
-                // Credit tokenB at clearing price
                 uint256 proceeds = (order.amount * clearingPrice) / PRICE_SCALE;
-                bal.tokenBBalance += proceeds;
+                uint256 fee = (proceeds * PROTOCOL_FEE_BPS) / BPS_DENOMINATOR;
+                bal.tokenBBalance += (proceeds - fee);
+                totalFees += fee;
                 filled++;
             } else {
-                // Unfilled: unlock tokenA
                 bal.tokenALocked -= order.amount;
                 order.status = OrderStatus.Unfilled;
                 unfilled++;
             }
+        }
+
+        if (totalFees > 0) {
+            protocolRevenue += totalFees;
+            emit ProtocolFeeCollected(batchId, totalFees);
         }
 
         b.status = BatchStatus.Settled;

@@ -220,7 +220,8 @@ contract BatchAuctionTest is Test {
         auction.submitOrder(0, BatchAuction.Side.Buy, 150 * PRICE_SCALE, 100 ether);
 
         (,,, uint256 bLocked) = auction.getUserBalance(bob);
-        assertEq(bLocked, 15_000 ether);
+        // Lock = cost + 0.1% fee = 15_000 + 15 = 15_015
+        assertEq(bLocked, 15_015 ether);
     }
 
     // ========== SETTLEMENT ==========
@@ -238,11 +239,11 @@ contract BatchAuctionTest is Test {
     function test_buyerPaysLessThanLimit() public {
         _setupAndSettle();
 
-        // Bob bid 150, clearing is 120. He should pay 120.
-        // Bob deposited 20_000 USDC, cost = 100 * 120 = 12_000
-        // Remaining USDC = 20_000 - 12_000 = 8_000
+        // Bob bid 150, clearing is 120. He pays 120 + 0.1% fee.
+        // cost = 100 * 120 = 12_000, fee = 12 USDC
+        // Remaining USDC = 20_000 - 12_012 = 7_988
         (, uint256 bobB,,) = auction.getUserBalance(bob);
-        assertEq(bobB, 8_000 ether);
+        assertEq(bobB, 7_988 ether);
 
         // Bob receives 100 tokenA
         (uint256 bobA,,,) = auction.getUserBalance(bob);
@@ -253,16 +254,17 @@ contract BatchAuctionTest is Test {
         _setupAndSettle();
 
         // Alice sold at 120 (her limit), clearing = 120
-        // Proceeds = 100 * 120 = 12_000 USDC
+        // Proceeds = 100 * 120 = 12_000, fee = 12 USDC
+        // Net = 12_000 - 12 = 11_988
         (, uint256 aliceB,,) = auction.getUserBalance(alice);
-        assertEq(aliceB, 12_000 ether);
+        assertEq(aliceB, 11_988 ether);
     }
 
     function test_aliceWithdrawsProceeds() public {
         _setupAndSettle();
 
         (, uint256 aliceB,,) = auction.getUserBalance(alice);
-        assertEq(aliceB, 12_000 ether);
+        assertEq(aliceB, 11_988 ether);
 
         vm.prank(alice);
         auction.withdraw(0, aliceB);
@@ -316,10 +318,10 @@ contract BatchAuctionTest is Test {
         // lastSellPrice = 100 (Alice's price at the crossing boundary).
         assertEq(clearingPrice, 100 * PRICE_SCALE);
 
-        // Both Alice and Charlie fill at 100 (sell limits <= 100)
-        // Alice: limit 100 <= clearing 100, fills. Gets 100 * 100 = 10_000
+        // Alice: limit 100 <= clearing 100, fills. Gets 100 * 100 = 10_000, fee = 10
+        // Net = 10_000 - 10 = 9_990
         (, uint256 aliceB,,) = auction.getUserBalance(alice);
-        assertEq(aliceB, 10_000 ether);
+        assertEq(aliceB, 9_990 ether);
 
         // Charlie: limit 110 > clearing 100, does NOT fill. Unfilled.
         (, uint256 charlieB,,) = auction.getUserBalance(charlie);
@@ -388,7 +390,7 @@ contract BatchAuctionTest is Test {
         vm.prank(settler);
         auction.openBatch();
 
-        for (uint256 i = 0; i < 20; i++) {
+        for (uint256 i = 0; i < 100; i++) {
             address trader = makeAddr(string(abi.encodePacked("trader", i)));
             shSOL.mint(trader, 10 ether);
             vm.startPrank(trader);
@@ -453,6 +455,60 @@ contract BatchAuctionTest is Test {
         (uint256 balA, uint256 balB,,) = auction.getUserBalance(alice);
         assertEq(balA, 50 ether);
         assertEq(balB, 25_000 ether);
+    }
+
+    // ========== PROTOCOL FEE ==========
+
+    function test_protocolFeeAccumulates() public {
+        _setupAndSettle();
+
+        // clearing = 120, volume = 100 tokenA
+        // buyer fee: 100 * 120 * 0.001 = 12 USDC
+        // seller fee: 100 * 120 * 0.001 = 12 USDC
+        // total = 24 USDC
+        assertEq(auction.protocolRevenue(), 24 ether);
+    }
+
+    function test_withdrawRevenue() public {
+        _setupAndSettle();
+
+        uint256 rev = auction.protocolRevenue();
+        assertGt(rev, 0);
+
+        auction.withdrawRevenue(deployer);
+        assertEq(auction.protocolRevenue(), 0);
+        assertEq(shUSDC.balanceOf(deployer), rev);
+    }
+
+    // ========== SETTLER FALLBACK ==========
+
+    function test_anyoneCanSettleAfterGracePeriod() public {
+        vm.prank(alice);
+        auction.deposit(100 ether, 0);
+        vm.prank(bob);
+        auction.deposit(0, 20_000 ether);
+
+        vm.prank(settler);
+        auction.openBatch();
+
+        vm.prank(alice);
+        auction.submitOrder(0, BatchAuction.Side.Sell, 120 * PRICE_SCALE, 100 ether);
+        vm.prank(bob);
+        auction.submitOrder(0, BatchAuction.Side.Buy, 150 * PRICE_SCALE, 100 ether);
+
+        // After batch close but within grace period, non-settler reverts
+        vm.warp(block.timestamp + 31);
+        vm.prank(charlie);
+        vm.expectRevert(BatchAuction.NotSettler.selector);
+        auction.settleBatch(0);
+
+        // After grace period (300s), anyone can settle
+        vm.warp(block.timestamp + 300);
+        vm.prank(charlie);
+        auction.settleBatch(0);
+
+        (,,,,, BatchAuction.BatchStatus status) = auction.getBatch(0);
+        assertEq(uint8(status), uint8(BatchAuction.BatchStatus.Settled));
     }
 
     // ========== HELPERS ==========
